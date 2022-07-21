@@ -5,8 +5,8 @@
 #define UNUSED_SHIT(fucking_unused_shit) do { (void)(fucking_unused_shit); } while (0)
 
 enum Boolean {
-    false,
-    true
+    False,
+    True
 };
 
 enum Flags {
@@ -35,25 +35,53 @@ enum Flags {
 //     *flags = 0;
 // }
 
+// void read_and_output_file_line_by_line(const char* filename) {
+//     FILE* input_file = fopen(filename, "r");
+//     if (input_file == NULL) {
+//         exit(-1);
+//     }
+
+//     const size_t line_size = 300;
+//     char* line = malloc(line_size);
+    
+//     if (!line)
+//         exit(-1);
+
+//     while (fgets(line, line_size, input_file) != NULL)  {
+//         printf("%s", line);
+//     }
+
+//     free(line);             // dont forget to free heap memory
+//     fclose(input_file);
+// }
+
+
 void read_and_output_file_line_by_line(const char* filename) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
         exit(-1);
     }
 
-    const size_t line_size = 300;
-    char* line = malloc(line_size);
-    
-    if (!line)
-        exit(-1);
+    ssize_t line_actual_length = 0ul;
+    size_t line_allocated_length = 0l;
+    char *line = NULL;
 
-    while (fgets(line, line_size, input_file) != NULL)  {
+    while (True)  {                                                                                         //  getline allocates memory
+        line_actual_length = getline(&line, &line_allocated_length, input_file);
         printf("%s", line);
+        
+        if (line_actual_length == EOF) {
+            printf("%s", line);
+            break;
+        }
     }
 
-    free(line);             // dont forget to free heap memory
+    free(line);                                                                                             //  because getline allocates memory
     fclose(input_file);
+
+    UNUSED_SHIT(line_actual_length);
 }
+
 
 void print_command_line_arguments(int counter, const char** arguments) {
     for (int index = 0; index < counter; ++index) {
@@ -71,4 +99,4 @@ int main(int counter, const char **arguments) {
 
     
     return -1;
-}
+} // last non-empty line

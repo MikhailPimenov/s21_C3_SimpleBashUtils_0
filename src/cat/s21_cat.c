@@ -56,11 +56,11 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags)
     size_t line_allocated_length = 0l;
     char *line = NULL;
 
-    int line_number = 1;
+    int line_number = 1;                                                                                    //  first line has number '1'
     while (True)  {                                                                                         //  getline allocates memory
         line_actual_length = getline(&line, &line_allocated_length, input_file);
         if (flags->n) {
-            printf("%6d  %s", line_number, line);  //  number width is 6
+            printf("%6d  %s", line_number, line);                                                           //  width for line number is 6
             ++line_number;
         } else {
             printf("%s", line);

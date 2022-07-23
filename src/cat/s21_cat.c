@@ -147,21 +147,44 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* flag_coun
     
         const int argument_length = get_string_length(arguments[argument_index]);
     
-        if (argument_length == short_flag_length && are_equal("-b", arguments[argument_index], argument_length)) {
+        if ((argument_length == short_flag_length && 
+             are_equal("-b", arguments[argument_index], argument_length)) || 
+            (argument_length == get_string_length("--number-nonblank") && 
+             are_equal("--number-nonblank", arguments[argument_index], argument_length))) {
+
             flags->b = True;
             ++(*flag_counter);
-        } else if (argument_length == short_flag_length && are_equal("-e", arguments[argument_index], argument_length)) {
+
+        } else if (argument_length == short_flag_length && 
+                  (are_equal("-e", arguments[argument_index], argument_length) ||
+                   are_equal("-E", arguments[argument_index], argument_length))) {
+
             flags->e = True;
             ++(*flag_counter);
-        } else if (argument_length == short_flag_length && are_equal("-n", arguments[argument_index], argument_length)) {
+
+        } else if ((argument_length == short_flag_length && 
+                    are_equal("-n", arguments[argument_index], argument_length)) || 
+                    (argument_length == get_string_length("--number") && 
+                    are_equal("--number", arguments[argument_index], argument_length))) {
+
             flags->n = True;
             ++(*flag_counter);
-        } else if (argument_length == short_flag_length && are_equal("-s", arguments[argument_index], argument_length)) {
+
+        } else if ((argument_length == short_flag_length && 
+                    are_equal("-s", arguments[argument_index], argument_length)) || 
+                   (argument_length == get_string_length("--squeeze-blank") && 
+                    are_equal("--squeeze-blank", arguments[argument_index], argument_length))) {
+
             flags->s = True;
             ++(*flag_counter);
-        } else if (argument_length == short_flag_length && are_equal("-t", arguments[argument_index], argument_length)) {   
+
+        } else if (argument_length == short_flag_length && 
+                  (are_equal("-t", arguments[argument_index], argument_length) ||
+                   are_equal("-T", arguments[argument_index], argument_length))) {
+
             flags->t = True;
             ++(*flag_counter);
+
         }
     }
 }

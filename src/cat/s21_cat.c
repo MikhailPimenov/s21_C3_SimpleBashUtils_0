@@ -88,7 +88,8 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
-        exit(-1);
+        printf("Failed to open file %s\n", filename);
+        return;
     }
 
     ssize_t line_actual_length = 0ul;
@@ -199,7 +200,9 @@ int main(int counter, const char **arguments) {
     int flag_counter = 0;
     set_flags(counter - 1, arguments + 1, &flags, &flag_counter);
 
-    read_and_output_file_line_by_line(arguments[1 + flag_counter], &flags);
+    for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
+        read_and_output_file_line_by_line(arguments[file_index], &flags);
+    }
     UNUSED_SHIT(counter);
 
 

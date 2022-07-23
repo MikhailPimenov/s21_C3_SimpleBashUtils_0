@@ -9,7 +9,8 @@
             "request": "launch",
             "name": "Debug that shit",
             "program": "${workspaceFolder}/src/cat/s21_cat.out",
-            "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
+            // "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
+            "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
             "cwd": "${workspaceFolder}"
         }
     ]

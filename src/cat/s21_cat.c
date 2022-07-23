@@ -45,7 +45,28 @@ void initialize_flags(Flags *flags) {
 //     fclose(input_file);
 // }
 
+int is_tab(char symbol) {
+    return symbol == '\t';
+}
+int is_end_of_file(char symbol) {
+    return symbol == '\n';
+}
 
+void print_line_number(int number) {
+    printf("%6d  ", number);                                                                                //  width for line number is 6
+}
+void print_line(const char* line, int length, const Flags* flags) {
+    for (int index = 0; index < length; ++index) {
+        if (flags->t && is_tab(line[index])) {
+            printf("%s", "^I");
+        } else if (flags->e && is_end_of_file(line[index])) {
+            printf("%c", '$');
+            printf("%c", '\n');
+        } else {
+            printf("%c", line[index]);
+        }
+    }
+}
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
@@ -60,10 +81,13 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags)
     while (True)  {                                                                                         //  getline allocates memory
         line_actual_length = getline(&line, &line_allocated_length, input_file);
         if (flags->n) {
-            printf("%6d  %s", line_number, line);                                                           //  width for line number is 6
+            print_line_number(line_number);
+            // printf("%6d  %s", line_number, line);                                                           //  width for line number is 6
             ++line_number;
+            print_line(line, line_actual_length, flags);
         } else {
-            printf("%s", line);
+            // printf("%s", line);
+            print_line(line, line_actual_length, flags);
         }
 
         if (line_actual_length == EOF) {

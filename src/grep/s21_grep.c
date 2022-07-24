@@ -1,3 +1,4 @@
+#include <assert.h
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,41 +10,36 @@ enum Boolean {
     True
 };
 
+typedef struct Patterns {
+    int *indices;
+    int counter;
+} Patterns;
+
 typedef struct Flags {
-    char b;
     char e;
+    char i;
+    char v;
+    char c;
+    char l;
     char n;
+    char h;
     char s;
-    char t;
+    char f;
+    char o;
 } Flags;
 
 void initialize_flags(Flags *flags) {
-    flags->b = False;
     flags->e = False;
+    flags->i = False;
+    flags->v = False;
+    flags->c = False;
+    flags->l = False;
     flags->n = False;
+    flags->h = False;
     flags->s = False;
-    flags->t = False;
+    flags->f = False;
+    flags->o = False;
 }
-
-// void read_and_output_file_line_by_line(const char* filename) {
-//     FILE* input_file = fopen(filename, "r");
-//     if (input_file == NULL) {
-//         exit(-1);
-//     }
-
-//     const size_t line_size = 300;
-//     char* line = malloc(line_size);
-    
-//     if (!line)
-//         exit(-1);
-
-//     while (fgets(line, line_size, input_file) != NULL)  {
-//         printf("%s", line);
-//     }
-
-//     free(line);             // dont forget to free heap memory
-//     fclose(input_file);
-// }
 
 int is_tab(char symbol) {
     return symbol == '\t';
@@ -56,46 +52,36 @@ void print_line_number(int number) {
     printf("%6d  ", number);                                                                                //  width for line number is 6
 }
 void print_line(int *line_number, const char* line, int length, const Flags* flags, int* is_empty) {
-    if (flags->s && *is_empty && length <= 1)
-        return;
+    // if (flags->s && *is_empty && length <= 1)
+    //     return;
 
-    if (length <= 1)
-        *is_empty = True;
-    else 
-        *is_empty = False;
+    // if (length <= 1)
+    //     *is_empty = True;
+    // else 
+    //     *is_empty = False;
 
-    if (flags->b) {
-        if (length > 1) {
-            print_line_number(*line_number);
-            ++(*line_number);
-        }
-    } else if (flags->n) {
-        print_line_number(*line_number);
-        ++(*line_number);
-    }
+    // if (flags->b) {
+    //     if (length > 1) {
+    //         print_line_number(*line_number);
+    //         ++(*line_number);
+    //     }
+    // } else if (flags->n) {
+    //     print_line_number(*line_number);
+    //     ++(*line_number);
+    // }
     
     for (int index = 0; index < length; ++index) {
-        if (flags->t && is_tab(line[index])) {
-            printf("%s", "^I");
-        } else if (flags->e && is_end_of_file(line[index])) {
-            printf("%c", '$');
-            printf("%c", '\n');
-        } else {
+        // if (flags->t && is_tab(line[index])) {
+        //     printf("%s", "^I");
+        // } else if (flags->e && is_end_of_file(line[index])) {
+        //     printf("%c", '$');
+        //     printf("%c", '\n');
+        // } else {
             printf("%c", line[index]);
-        }
+        // }
     }
 }
-
-int get_line_length(const char* line) {
-    int length = 0;
-    while (line[length] != '\n')
-        ++length;
-    ++length;
-
-    return length;
-}
-
-void read_and_output_file_line_by_line(const char* filename, const Flags* flags) {
+void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Patterns* patterns) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
         printf("Failed to open file %s\n", filename);
@@ -157,53 +143,80 @@ int get_string_length(const char* string) {
     return length;
 }
 
-void set_flags(int counter, const char** arguments, Flags* flags, int* flag_counter) {
+void set_flags(int counter, const char** arguments, Flags* flags, int* flag_counter, Patterns* patterns) {
     static const int short_flag_length = 2;
 
+    int pattern_index = 0;
     for (int argument_index = 0; argument_index < counter; ++argument_index) {
     
         const int argument_length = get_string_length(arguments[argument_index]);
     
-        if ((argument_length == short_flag_length && 
-             are_equal("-b", arguments[argument_index], argument_length)) || 
-            (argument_length == get_string_length("--number-nonblank") && 
-             are_equal("--number-nonblank", arguments[argument_index], argument_length))) {
-
-            flags->b = True;
-            ++(*flag_counter);
-
-        } else if (argument_length == short_flag_length && 
-                  (are_equal("-e", arguments[argument_index], argument_length) ||
-                   are_equal("-E", arguments[argument_index], argument_length))) {
+        if (argument_length == short_flag_length && 
+            are_equal("-e", arguments[argument_index], argument_length)) {
 
             flags->e = True;
             ++(*flag_counter);
 
-        } else if ((argument_length == short_flag_length && 
-                    are_equal("-n", arguments[argument_index], argument_length)) || 
-                    (argument_length == get_string_length("--number") && 
-                    are_equal("--number", arguments[argument_index], argument_length))) {
+            patterns->indices[pattern_index] = argument_index + 1;  //  because pattern goes right after -e, so its index is +1
+            ++pattern_index;
+            ++(patterns->counter);
 
-            flags->n = True;
-            ++(*flag_counter);
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-i", arguments[argument_index], argument_length)) {
 
-        } else if ((argument_length == short_flag_length && 
-                    are_equal("-s", arguments[argument_index], argument_length)) || 
-                   (argument_length == get_string_length("--squeeze-blank") && 
-                    are_equal("--squeeze-blank", arguments[argument_index], argument_length))) {
-
-            flags->s = True;
+            flags->i = True;
             ++(*flag_counter);
 
         } else if (argument_length == short_flag_length && 
-                  (are_equal("-t", arguments[argument_index], argument_length) ||
-                   are_equal("-T", arguments[argument_index], argument_length))) {
+                   are_equal("-v", arguments[argument_index], argument_length)) {
 
-            flags->t = True;
+            flags->v = True;
+            ++(*flag_counter);
+        
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-c", arguments[argument_index], argument_length)) {
+
+            flags->c = True;
+            ++(*flag_counter);
+        
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-l", arguments[argument_index], argument_length)) {
+
+            flags->l = True;
+            ++(*flag_counter);
+        
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-n", arguments[argument_index], argument_length)) {
+
+            flags->n = True;
+            ++(*flag_counter);
+        
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-h", arguments[argument_index], argument_length)) {
+
+            flags->h = True;
+            ++(*flag_counter);
+        
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-s", arguments[argument_index], argument_length)) {
+
+            flags->s = True;
+            ++(*flag_counter);
+        
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-f", arguments[argument_index], argument_length)) {
+
+            flags->f = True;
             ++(*flag_counter);
 
+            assert(0 && "NOT IMPLEMENTED FILENAME STORAGE FOR REGEX!");
+            //  TODO: store somewhere filename for regex!!!
         }
     }
+}
+void initialize_patterns(Patterns* patterns) {
+    patterns->indices = NULL;
+    patterns->counter = 0;
 }
 int main(int counter, const char **arguments) {
     // int flags = 0;
@@ -213,17 +226,23 @@ int main(int counter, const char **arguments) {
 
     Flags flags;
     initialize_flags(&flags);
+
+    Patterns patterns;
+    initialize_patternts(&patterns);
+    patterns.indices = malloc(counter * sizeof(int));
+
+
     int flag_counter = 0;
-    set_flags(counter - 1, arguments + 1, &flags, &flag_counter);
+    set_flags(counter - 1, arguments + 1, &flags, &flag_counter, &patterns);
 
     for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
-        read_and_output_file_line_by_line(arguments[file_index], &flags);
+        read_and_output_file_line_by_line(arguments[file_index], &flags, &patterns);
     }
     UNUSED_SHIT(counter);
 
 
 
 
-
+    free(patterns.indices);
     return -1;
 } // last non-empty line

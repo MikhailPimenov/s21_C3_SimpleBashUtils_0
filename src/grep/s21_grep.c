@@ -1,4 +1,4 @@
-#include <assert.h
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +44,7 @@ void initialize_flags(Flags *flags) {
 int is_tab(char symbol) {
     return symbol == '\t';
 }
+
 int is_end_of_file(char symbol) {
     return symbol == '\n';
 }
@@ -51,6 +52,7 @@ int is_end_of_file(char symbol) {
 void print_line_number(int number) {
     printf("%6d  ", number);                                                                                //  width for line number is 6
 }
+
 void print_line(int *line_number, const char* line, int length, const Flags* flags, int* is_empty) {
     // if (flags->s && *is_empty && length <= 1)
     //     return;
@@ -80,7 +82,12 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
             printf("%c", line[index]);
         // }
     }
+
+    UNUSED_SHIT(flags);
+    UNUSED_SHIT(is_empty);
+    UNUSED_SHIT(line_number);
 }
+
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Patterns* patterns) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
@@ -91,21 +98,21 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     // ssize_t line_actual_length = 0ul;
     int line_actual_length = 0ul;
     size_t line_allocated_length = 0l;
-    // char *line = NULL;
-    static const int max_line_length = 500;
-    char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
+    char *line = NULL;
+    // static const int max_line_length = 500;
+    // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = 0;
     while (True)  {                                                                                         //  getline allocates memory
-        // line_actual_length = getline(&line, &line_allocated_length, input_file);
-        const char* result = fgets(line, max_line_length, input_file);
+        line_actual_length = getline(&line, &line_allocated_length, input_file);
+        // const char* result = fgets(line, max_line_length, input_file);
   
-        // if (line_actual_length == EOF) {
-        if (!result) {
+        if (line_actual_length == EOF) {
+        // if (!result) {
             break;
         }
-        line_actual_length = get_line_length(line);
+        // line_actual_length = get_line_length(line);
         print_line(&line_number, line, line_actual_length, flags, &is_line_empty);
     }
 
@@ -113,6 +120,10 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     fclose(input_file);
 
     UNUSED_SHIT(line_allocated_length);
+    UNUSED_SHIT(line_number);
+    UNUSED_SHIT(flags);
+    UNUSED_SHIT(is_line_empty);
+    UNUSED_SHIT(patterns);
 }
 
 int are_equal(const char* string1, const char* string2, int length) {
@@ -128,7 +139,6 @@ int is_found(const char* substring, int sublength, const char* string, int lengt
             return True;
     return False;
 }
-
 
 void print_command_line_arguments(int counter, const char** arguments) {
     for (int index = 0; index < counter; ++index) {
@@ -214,10 +224,12 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* flag_coun
         }
     }
 }
+
 void initialize_patterns(Patterns* patterns) {
     patterns->indices = NULL;
     patterns->counter = 0;
 }
+
 int main(int counter, const char **arguments) {
     // int flags = 0;
 
@@ -228,7 +240,7 @@ int main(int counter, const char **arguments) {
     initialize_flags(&flags);
 
     Patterns patterns;
-    initialize_patternts(&patterns);
+    initialize_patterns(&patterns);
     patterns.indices = malloc(counter * sizeof(int));
 
 

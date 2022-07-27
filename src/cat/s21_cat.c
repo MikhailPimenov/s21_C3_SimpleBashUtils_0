@@ -48,7 +48,7 @@ void initialize_flags(Flags *flags) {
 int is_tab(char symbol) {
     return symbol == '\t';
 }
-int is_end_of_file(char symbol) {
+int is_end_of_line(char symbol) {
     return symbol == '\n';
 }
 
@@ -77,7 +77,7 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
     for (int index = 0; index < length; ++index) {
         if (flags->t && is_tab(line[index])) {
             printf("%s", "^I");
-        } else if (flags->e && is_end_of_file(line[index])) {
+        } else if (flags->e && is_end_of_line(line[index])) {
             printf("%c", '$');
             printf("%c", '\n');
         } else {

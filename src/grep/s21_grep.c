@@ -27,6 +27,8 @@ typedef struct Flags {
     char s;
     char f;
     char o;
+
+    char print_filename;
 } Flags;
 
 void initialize_flags(Flags *flags) {
@@ -40,6 +42,8 @@ void initialize_flags(Flags *flags) {
     flags->s = False;
     flags->f = False;
     flags->o = False;
+
+    flags->print_filename = False;
 }
 
 int is_tab(char symbol) {
@@ -51,24 +55,42 @@ int is_end_of_file(char symbol) {
 }
 
 void print_line_number(int number) {
-    printf("%6d  ", number);                                                                                //  width for line number is 6
+    printf("%d:", number);                                                                                //  width for line number is 6
 }
 
-int are_equal(const char* string1, const char* string2, int length) {
-    for (int index = 0; index < length; ++index)
-        if (string1[index] != string2[index])
+// int are_equal(const char* string1, const char* string2, int length) {
+//     for (int index = 0; index < length; ++index)
+//         if (string1[index] != string2[index])
+//             return False;
+//     return True;
+// }
+
+int are_equal(const char* string1, const char* string2, int length, int ignore_case) {
+    for (int index = 0; index < length; ++index) {
+        char symbol1 = string1[index];
+        char symbol2 = string2[index];
+
+        if (ignore_case) {
+            if ('A' <= string1[index] && string1[index] <= 'Z')
+                symbol1 += ('a' - 'A');
+            if ('A' <= string2[index] && string2[index] <= 'Z')
+                symbol2 += ('a' - 'A');
+        }
+
+        if (symbol1 != symbol2)
             return False;
+    }
     return True;
 }
 
-int is_found(const char* substring, int sublength, const char* string, int length) {
+int is_found(const char* substring, int sublength, const char* string, int length, const Flags* flags) {
     for (int index = 0; index < length - sublength; ++index)
-        if (are_equal(substring, string + index, sublength))
+        if (are_equal(substring, string + index, sublength, flags->i))
             return True;
     return False;
 }
 
-void print_line(int *line_number, const char* line, int length, const Flags* flags, int* is_empty) {
+void print_line(int line_number, const char* line, int length, const Flags* flags, int* is_empty, const char* filename) {
     // if (flags->s && *is_empty && length <= 1)
     //     return;
 
@@ -86,6 +108,15 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
     //     print_line_number(*line_number);
     //     ++(*line_number);
     // }
+    
+    if (flags->print_filename && !flags->h)
+        printf("%s:", filename);
+
+    if (flags->n)
+        print_line_number(line_number);
+
+    // if (flags->o)
+    //     printf("%s", line);    
     
     for (int index = 0; index < length; ++index) {
         // if (flags->t && is_tab(line[index])) {
@@ -117,7 +148,7 @@ int is_line_suitable(const char* line, int line_length, const Flags* flags, cons
         const char* word = patterns->words[patterns->indices[pattern_number]];
         const int word_length = get_string_length(word);
 
-        if (is_found(word, word_length, line, line_length)) {
+        if (is_found(word, word_length, line, line_length, flags)) {
             is_suitable = True;
             break;
         }
@@ -125,13 +156,18 @@ int is_line_suitable(const char* line, int line_length, const Flags* flags, cons
 
 
     UNUSED_SHIT(flags);
+
+    if (flags->v)
+        is_suitable = !is_suitable;
+
     return is_suitable;
 }
 
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Patterns* patterns) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
-        printf("Failed to open file %s\n", filename);
+        if (!flags->s)  
+            printf("Failed to open file %s\n", filename);
         return;
     }
 
@@ -143,7 +179,8 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
-    int is_line_empty = 0;
+    int is_line_empty = False;
+    int is_file_suitable = False;
     while (True)  {                                                                                         //  getline allocates memory
         line_actual_length = getline(&line, &line_allocated_length, input_file);
         // const char* result = fgets(line, max_line_length, input_file);
@@ -153,12 +190,23 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
             break;
         }
         // line_actual_length = get_line_length(line);
-        if (is_line_suitable(line, line_actual_length, flags, patterns))
-            print_line(&line_number, line, line_actual_length, flags, &is_line_empty);
+        if (is_line_suitable(line, line_actual_length, flags, patterns)) {
+            
+            if (flags->l) {
+                is_file_suitable = True;
+                break;
+            }
+
+            print_line(line_number, line, line_actual_length, flags, &is_line_empty, filename);
+        }
+        ++line_number;
     }
 
     free(line);                                                                                             //  because getline allocates memory
     fclose(input_file);
+
+    if (flags->l && is_file_suitable)
+        printf("%s\n", filename);
 
     UNUSED_SHIT(line_allocated_length);
     UNUSED_SHIT(line_number);
@@ -186,62 +234,62 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* words_cou
         const int argument_length = get_string_length(arguments[argument_index]);
     
         if (argument_length == short_flag_length && 
-            are_equal("-e", arguments[argument_index], argument_length)) {
+            are_equal("-e", arguments[argument_index], argument_length, False)) {
 
             flags->e = True;
             (*words_counter) += 2;
 
             printf("pattern #%d: %s\n", argument_index + 1, arguments[argument_index + 1]);
-            patterns->indices[pattern_index] = argument_index + 1 + 1;  //  because pattern goes right after -e, so its index is +1
+            patterns->indices[pattern_index] = argument_index + 1;  //  because pattern goes right after -e, so its index is +1
             printf("pattern #%d: %s\n", patterns->indices[pattern_index], patterns->words[patterns->indices[pattern_index] + 1]);
             ++pattern_index;
             ++(patterns->counter);
 
 
         } else if (argument_length == short_flag_length && 
-                   are_equal("-i", arguments[argument_index], argument_length)) {
+                   are_equal("-i", arguments[argument_index], argument_length, False)) {
 
             flags->i = True;
             ++(*words_counter);
 
         } else if (argument_length == short_flag_length && 
-                   are_equal("-v", arguments[argument_index], argument_length)) {
+                   are_equal("-v", arguments[argument_index], argument_length, False)) {
 
             flags->v = True;
             ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
-                   are_equal("-c", arguments[argument_index], argument_length)) {
+                   are_equal("-c", arguments[argument_index], argument_length, False)) {
 
             flags->c = True;
             ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
-                   are_equal("-l", arguments[argument_index], argument_length)) {
+                   are_equal("-l", arguments[argument_index], argument_length, False)) {
 
             flags->l = True;
             ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
-                   are_equal("-n", arguments[argument_index], argument_length)) {
+                   are_equal("-n", arguments[argument_index], argument_length, False)) {
 
             flags->n = True;
             ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
-                   are_equal("-h", arguments[argument_index], argument_length)) {
+                   are_equal("-h", arguments[argument_index], argument_length, False)) {
 
             flags->h = True;
             ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
-                   are_equal("-s", arguments[argument_index], argument_length)) {
+                   are_equal("-s", arguments[argument_index], argument_length, False)) {
 
             flags->s = True;
             ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
-                   are_equal("-f", arguments[argument_index], argument_length)) {
+                   are_equal("-f", arguments[argument_index], argument_length, False)) {
 
             flags->f = True;
             ++(*words_counter);
@@ -274,7 +322,15 @@ int main(int counter, const char **arguments) {
 
 
     int flag_counter = 0;
-    set_flags(counter - 1, arguments + 1, &flags, &flag_counter, &patterns);
+    set_flags(counter, arguments, &flags, &flag_counter, &patterns);
+
+
+    if (counter - (flag_counter + 1) > 1)  //  файлов больше одного
+        flags.print_filename = True;
+
+
+    // TODO: STRUCT TO STORE INDICES FOR FILENAMES
+
 
     for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
         printf("filename #%d: %s\n", file_index, arguments[file_index]);

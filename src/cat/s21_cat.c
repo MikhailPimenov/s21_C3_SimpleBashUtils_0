@@ -25,26 +25,6 @@ void initialize_flags(Flags *flags) {
     flags->t = False;
 }
 
-// void read_and_output_file_line_by_line(const char* filename) {
-//     FILE* input_file = fopen(filename, "r");
-//     if (input_file == NULL) {
-//         exit(-1);
-//     }
-
-//     const size_t line_size = 300;
-//     char* line = malloc(line_size);
-    
-//     if (!line)
-//         exit(-1);
-
-//     while (fgets(line, line_size, input_file) != NULL)  {
-//         printf("%s", line);
-//     }
-
-//     free(line);             // dont forget to free heap memory
-//     fclose(input_file);
-// }
-
 int is_tab(char symbol) {
     return symbol == '\t';
 }
@@ -73,7 +53,7 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
         print_line_number(*line_number);
         ++(*line_number);
     }
-    
+
     for (int index = 0; index < length; ++index) {
         if (flags->t && is_tab(line[index])) {
             printf("%s", "^I");
@@ -84,6 +64,9 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
             printf("%c", line[index]);
         }
     }
+    UNUSED_SHIT(line_number);
+    UNUSED_SHIT(is_empty);
+    UNUSED_SHIT(flags);
 }
 
 int get_line_length(const char* line) {
@@ -214,16 +197,12 @@ int main(int counter, const char **arguments) {
     Flags flags;
     initialize_flags(&flags);
     int flag_counter = 0;
-    set_flags(counter - 1, arguments + 1, &flags, &flag_counter);
+    set_flags(counter, arguments, &flags, &flag_counter);
 
     for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
         read_and_output_file_line_by_line(arguments[file_index], &flags);
     }
     UNUSED_SHIT(counter);
 
-
-
-
-
-    return -1;
+    return 0;
 } // last non-empty line

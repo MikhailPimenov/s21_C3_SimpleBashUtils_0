@@ -173,20 +173,20 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
 
     // ssize_t line_actual_length = 0ul;
     int line_actual_length = 0ul;
-    size_t line_allocated_length = 0l;
+    // size_t line_allocated_length = 0l;
     char *line = NULL;
-    // static const int max_line_length = 500;
+    static const int max_line_length = 500;
     // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = False;
     int is_file_suitable = False;
     while (True)  {                                                                                         //  getline allocates memory
-        line_actual_length = getline(&line, &line_allocated_length, input_file);
-        // const char* result = fgets(line, max_line_length, input_file);
+        // line_actual_length = getline(&line, &line_allocated_length, input_file);
+        const char* result = fgets(line, max_line_length, input_file);
   
-        if (line_actual_length == EOF) {
-        // if (!result) {
+        // if (line_actual_length == EOF) {
+        if (!result) {
             break;
         }
         // line_actual_length = get_line_length(line);

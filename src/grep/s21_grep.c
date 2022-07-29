@@ -10,11 +10,25 @@ enum Boolean {
     True
 };
 
+typedef struct Regexes {
+    const char** words;
+    int* indices;
+    int counter;
+
+    const char** regexes;
+} Regexes;
+
 typedef struct Patterns {
     const char** words;                                                                                //  a.k.a. command line arguments
     int *indices;
     int counter;
 } Patterns;
+
+typedef struct Filenames {
+    const char** words;
+    int* indices;
+    int counter;
+} Filenames;
 
 typedef struct Flags {
     char e;
@@ -135,13 +149,28 @@ void print_line(int line_number, const char* line, int length, const Flags* flag
 }
 
 int get_string_length(const char* string) {
+    if (!string)
+        return 0;
+
     int length = 0;
     while (string[length])
         ++length;
     return length;
 }
 
+int get_line_length(const char* string) {
+    if (!string)
+        return 0;
+
+    int length = 0;
+    while (string[length] != '\n')
+        ++length;
+    ++length;
+    return length;    
+}
+
 int is_line_suitable(const char* line, int line_length, const Flags* flags, const Patterns* patterns) {
+    printf("is_line_suitable(): %s\n", line);
     int is_suitable = False;
         
     for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
@@ -171,22 +200,23 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
         return;
     }
 
-    // ssize_t line_actual_length = 0ul;
-    int line_actual_length = 0ul;
-    // size_t line_allocated_length = 0l;
+    ssize_t line_actual_length = 0ul;
+    // int line_actual_length = 0;
+    size_t line_allocated_length = 0l;
     char *line = NULL;
-    static const int max_line_length = 500;
+    // static const int max_line_length = 500;
     // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = False;
     int is_file_suitable = False;
     while (True)  {                                                                                         //  getline allocates memory
-        // line_actual_length = getline(&line, &line_allocated_length, input_file);
-        const char* result = fgets(line, max_line_length, input_file);
+        line_actual_length = getline(&line, &line_allocated_length, input_file);
+        printf("read_file_and_output...: %s\n", line);
+        // const char* result = fgets(line, max_line_length, input_file);
   
-        // if (line_actual_length == EOF) {
-        if (!result) {
+        if (line_actual_length == EOF) {
+        // if (!result) {
             break;
         }
         // line_actual_length = get_line_length(line);
@@ -208,7 +238,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     if (flags->l && is_file_suitable)
         printf("%s\n", filename);
 
-    UNUSED_SHIT(line_allocated_length);
+    // UNUSED_SHIT(line_allocated_length);
     UNUSED_SHIT(line_number);
     UNUSED_SHIT(flags);
     UNUSED_SHIT(is_line_empty);
@@ -225,11 +255,12 @@ void print_command_line_arguments(int counter, const char** arguments) {
 
 
 
-void set_flags(int counter, const char** arguments, Flags* flags, int* words_counter, Patterns* patterns) {
+void parse(int counter, const char** arguments, Flags* flags, Patterns* patterns, Filenames* filenames, Regexes* regexes) {
     static const int short_flag_length = 2;
 
     int pattern_index = 0;
-    for (int argument_index = 0; argument_index < counter; ++argument_index) {
+    int filename_index = 0;
+    for (int argument_index = 1; argument_index < counter; ++argument_index) {
     
         const int argument_length = get_string_length(arguments[argument_index]);
     
@@ -237,67 +268,70 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* words_cou
             are_equal("-e", arguments[argument_index], argument_length, False)) {
 
             flags->e = True;
-            (*words_counter) += 2;
 
             printf("pattern #%d: %s\n", argument_index + 1, arguments[argument_index + 1]);
             patterns->indices[pattern_index] = argument_index + 1;  //  because pattern goes right after -e, so its index is +1
-            printf("pattern #%d: %s\n", patterns->indices[pattern_index], patterns->words[patterns->indices[pattern_index] + 1]);
+            printf("pattern #%d: %s\n", patterns->indices[pattern_index], patterns->words[patterns->indices[pattern_index]]);
             ++pattern_index;
             ++(patterns->counter);
 
+            ++argument_index;
 
         } else if (argument_length == short_flag_length && 
                    are_equal("-i", arguments[argument_index], argument_length, False)) {
 
             flags->i = True;
-            ++(*words_counter);
 
         } else if (argument_length == short_flag_length && 
                    are_equal("-v", arguments[argument_index], argument_length, False)) {
 
             flags->v = True;
-            ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
                    are_equal("-c", arguments[argument_index], argument_length, False)) {
 
             flags->c = True;
-            ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
                    are_equal("-l", arguments[argument_index], argument_length, False)) {
 
             flags->l = True;
-            ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
                    are_equal("-n", arguments[argument_index], argument_length, False)) {
 
             flags->n = True;
-            ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
                    are_equal("-h", arguments[argument_index], argument_length, False)) {
 
             flags->h = True;
-            ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
                    are_equal("-s", arguments[argument_index], argument_length, False)) {
 
             flags->s = True;
-            ++(*words_counter);
         
         } else if (argument_length == short_flag_length && 
                    are_equal("-f", arguments[argument_index], argument_length, False)) {
 
             flags->f = True;
-            ++(*words_counter);
 
             assert(0 && "NOT IMPLEMENTED FILENAME STORAGE FOR REGEX!");
             //  TODO: store somewhere filename for regex!!!
+        } else {
+            printf("filename #%d: %s\n", argument_index, arguments[argument_index]);
+            filenames->indices[filename_index] = argument_index;
+            printf("filename #%d: %s\n", filenames->indices[filename_index], filenames->words[filenames->indices[filename_index]]);
+            ++filename_index;
+            ++(filenames->counter);
         }
     }
+
+    if (filenames->counter > 1)
+        flags->print_filename = True;
+
+    UNUSED_SHIT(regexes);
 }
 
 void initialize_patterns(Patterns* patterns) {
@@ -306,10 +340,22 @@ void initialize_patterns(Patterns* patterns) {
     patterns->counter = 0;
 }
 
-int main(int counter, const char **arguments) {
-    // int flags = 0;
+void initialize_filenames(Filenames* filenames) {
+    filenames->words = NULL;
+    filenames->indices = NULL;
+    filenames->counter = 0;
+}
 
-    // pick_flags(2, arguments, &flags);
+void initialize_regexes(Regexes* regexes) {
+    regexes->words = NULL;
+    regexes->indices = NULL;
+    regexes->counter = 0;
+
+    regexes->regexes = NULL;
+}
+
+
+int main(int counter, const char **arguments) {
     print_command_line_arguments(counter, arguments);
 
     Flags flags;
@@ -318,29 +364,58 @@ int main(int counter, const char **arguments) {
     Patterns patterns;
     initialize_patterns(&patterns);
     patterns.indices = malloc(counter * sizeof(int));
+    if (!patterns.indices) {
+        printf("Failed to allocate memory for pattern indices!\n");
+        return -1;
+    }
     patterns.words = arguments;
 
+    Filenames filenames;
+    initialize_filenames(&filenames);
+    filenames.indices = malloc(counter * sizeof(int));
+    if (!filenames.indices) {
+        printf("Failed to allocate memory for filename indices!\n");
+        free(patterns.indices);
+        return -1;
+    }
+    filenames.words = arguments;
 
-    int flag_counter = 0;
-    set_flags(counter, arguments, &flags, &flag_counter, &patterns);
 
+    Regexes regexes;
+    initialize_regexes(&regexes);
+    regexes.indices = malloc(counter * sizeof(int));
+    if (!regexes.indices) {
+        printf("Failed to allocate memory for regex filename indices!\n");
+        free(patterns.indices);
+        free(filenames.indices);
+        return -1;
+    }
+    regexes.words = arguments;
 
-    if (counter - (flag_counter + 1) > 1)  //  файлов больше одного
-        flags.print_filename = True;
+    parse(counter, arguments, &flags, &patterns, &filenames, &regexes);
+
+    // if (counter - (flag_counter + 1) > 1)  //  файлов больше одного
+    //     flags.print_filename = True;
 
 
     // TODO: STRUCT TO STORE INDICES FOR FILENAMES
 
 
-    for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
-        printf("filename #%d: %s\n", file_index, arguments[file_index]);
-        read_and_output_file_line_by_line(arguments[file_index], &flags, &patterns);
+    for (int filename_index = 0; filename_index < filenames.counter; ++filename_index) {
+        printf("%d) file to be opened: %s\n", filename_index, arguments[filenames.indices[filename_index]]);
+        read_and_output_file_line_by_line(arguments[filename_index], &flags, &patterns);
     }
+
+    // for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
+    //     printf("filename #%d: %s\n", file_index, arguments[file_index]);
+    //     read_and_output_file_line_by_line(arguments[file_index], &flags, &patterns);
+    // }
     UNUSED_SHIT(counter);
 
 
 
 
     free(patterns.indices);
+    free(filenames.indices);
     return -1;
 } // last non-empty line

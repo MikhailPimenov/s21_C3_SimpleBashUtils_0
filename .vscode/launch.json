@@ -12,7 +12,7 @@
             // "program": "${workspaceFolder}/src/cat/s21_cat.out",
             // "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
             // "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
-            "args": ["-e", "main", "-e", "define", "${workspaceFolder}/src/grep/s21_grep.c"],
+            "args": ["-e", "main", "-e", "define", "-e", "include", "${workspaceFolder}/src/grep/s21_grep.c"],
             "cwd": "${workspaceFolder}"
         }
     ]

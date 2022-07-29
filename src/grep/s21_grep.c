@@ -98,10 +98,18 @@ int are_equal(const char* string1, const char* string2, int length, int ignore_c
 }
 
 int is_found(const char* substring, int sublength, const char* string, int length, const Flags* flags) {
-    for (int index = 0; index < length - sublength; ++index)
-        if (are_equal(substring, string + index, sublength, flags->i))
-            return True;
-    return False;
+    int result = False;
+    for (int index = 0; index < length - sublength; ++index) {
+        if (are_equal(substring, string + index, sublength, flags->i)) {
+            if (flags->o) {
+                printf("%s\n", substring);
+                result = True;
+                continue;
+            }
+            break;
+        }
+    }
+    return result;
 }
 
 void print_line(int line_number, const char* line, int length, const Flags* flags, int* is_empty, const char* filename) {
@@ -132,16 +140,9 @@ void print_line(int line_number, const char* line, int length, const Flags* flag
     // if (flags->o)
     //     printf("%s", line);    
     
-    for (int index = 0; index < length; ++index) {
-        // if (flags->t && is_tab(line[index])) {
-        //     printf("%s", "^I");
-        // } else if (flags->e && is_end_of_file(line[index])) {
-        //     printf("%c", '$');
-        //     printf("%c", '\n');
-        // } else {
-            printf("%c", line[index]);
-        // }
-    }
+    if (!flags->o)
+        for (int index = 0; index < length; ++index)
+                printf("%c", line[index]);
 
     UNUSED_SHIT(flags);
     UNUSED_SHIT(is_empty);
@@ -170,7 +171,7 @@ int get_line_length(const char* string) {
 }
 
 int is_line_suitable(const char* line, int line_length, const Flags* flags, const Patterns* patterns) {
-    printf("is_line_suitable(): %s\n", line);
+    // printf("is_line_suitable(): %s\n", line);
     int is_suitable = False;
         
     for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
@@ -212,7 +213,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     int is_file_suitable = False;
     while (True)  {                                                                                         //  getline allocates memory
         line_actual_length = getline(&line, &line_allocated_length, input_file);
-        printf("read_file_and_output...: %s\n", line);
+        // printf("read_file_and_output...: %s\n", line);
         // const char* result = fgets(line, max_line_length, input_file);
   
         if (line_actual_length == EOF) {
@@ -319,6 +320,12 @@ void parse(int counter, const char** arguments, Flags* flags, Patterns* patterns
 
             assert(0 && "NOT IMPLEMENTED FILENAME STORAGE FOR REGEX!");
             //  TODO: store somewhere filename for regex!!!
+
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-o", arguments[argument_index], argument_length, False)) {
+
+            flags->o = True;
+        
         } else {
             printf("filename #%d: %s\n", argument_index, arguments[argument_index]);
             filenames->indices[filename_index] = argument_index;
@@ -400,10 +407,10 @@ int main(int counter, const char **arguments) {
 
     // TODO: STRUCT TO STORE INDICES FOR FILENAMES
 
-
+    printf("\n\n\n\n\n");
     for (int filename_index = 0; filename_index < filenames.counter; ++filename_index) {
         printf("%d) file to be opened: %s\n", filename_index, arguments[filenames.indices[filename_index]]);
-        read_and_output_file_line_by_line(arguments[filename_index], &flags, &patterns);
+        read_and_output_file_line_by_line(arguments[filenames.indices[filename_index]], &flags, &patterns);
     }
 
     // for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {

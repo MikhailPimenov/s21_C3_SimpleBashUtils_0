@@ -123,48 +123,37 @@ int is_found(const char* substring, int sublength, const char* string, int lengt
     return result;
 }
 
-typedef struct Line {
+typedef struct LineMemory {
     const char* word;
-    int length;
+    ssize_t length;
+    size_t allocated_length;
+} LineMemory;
+
+typedef struct LineInfo {
+    LineMemory line;
     int line_number;
     int match_counter;
-    int marched_pattern_index;
+    const char* pattern_word;
     const char* filename;
-} Line;
+} LineInfo;
 
-void print_line(int line_number, const char* line, int length, const Flags* flags, const char* filename, int match_counter, int matched_pattern_index, const Patterns* patterns) {
-// void print_line(const Line* line, const Flags* flags, const char* filename, int match_counter, int matched_pattern_index, const Patterns* patterns) {
-    // if (flags->s && *is_empty && length <= 1)
-    //     return;
-
-    // if (length <= 1)
-    //     *is_empty = True;
-    // else 
-    //     *is_empty = False;
-
-    // if (flags->b) {
-    //     if (length > 1) {
-    //         print_line_number(*line_number);
-    //         ++(*line_number);
-    //     }
-    // } else if (flags->n) {
-    //     print_line_number(*line_number);
-    //     ++(*line_number);
-    // }
+// void print_line(int line_number, const char* line, int length, const Flags* flags, const char* filename, int match_counter, int matched_pattern_index, const Patterns* patterns) {
+void print_line(const LineInfo* line, const Flags* flags) {
     
-    if (flags->print_filename && !flags->h && !flags->o)
-        printf("%s:", filename);
+    if (flags->print_filename && !flags->h)
+        printf("%s:", line->filename);
 
     if (flags->n)
-        print_line_number(line_number);
-    
-    if (!flags->o)
-        for(int index = 0; index < length; ++index)
-            printf("%c", line[index]);
-           
-    UNUSED_SHIT(flags);
-    UNUSED_SHIT(line_number);
-    UNUSED_SHIT(length);
+        print_line_number(line->line_number);
+
+
+    if (flags->o)
+        for (int index = 0; index < line->match_counter; ++index)
+            printf("%s\n", line->pattern_word);
+    else
+        for(int index = 0; index < line->length; ++index)
+            printf("%c", line->word[index]);
+
 }
 
 int get_string_length(const char* string) {
@@ -210,6 +199,19 @@ int is_line_suitable(const char* line, int line_length, const Flags* flags, cons
 
     return is_suitable;
 }
+void initialize_line_memory(LineMemory* line_memory) {
+    line_memory->word = NULL;
+    line_memory->length = 0ll;
+    line_memory->allocated_length = 0ull;
+}
+void initialize_line_info(LineInfo* line_info) {
+    initialize_line_memory(&(line_info->line));
+    
+    line_info->line_number = 0;
+    line_info->match_counter = 0;
+    line_info->pattern_word = NULL;
+    line_info->filename = NULL;
+}
 
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Patterns* patterns) {
     FILE* input_file = fopen(filename, "r");
@@ -219,17 +221,22 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
         return;
     }
 
-    ssize_t line_actual_length = 0ul;
+    // ssize_t line_actual_length = 0ul;
     // int line_actual_length = 0;
-    size_t line_allocated_length = 0l;
-    char *line = NULL;
+    // size_t line_allocated_length = 0l;
+    // char *line = NULL;
     // static const int max_line_length = 500;
     // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
+    LineInfo line_info;
+    initialize_line_info(&line_info);
+        
     int is_file_suitable = False;
     while (True)  {                                                                                         //  getline allocates memory
-        line_actual_length = getline(&line, &line_allocated_length, input_file);
+
+        // line_actual_length = getline(&line, &line_allocated_length, input_file);
+        line_info.line.length = getline(&line_info.line.word, &line_info.line.allocated_length, input_file);
         // printf("read_file_and_output...: %s\n", line);
         // const char* result = fgets(line, max_line_length, input_file);
   
@@ -238,6 +245,9 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
             break;
         }
         // line_actual_length = get_line_length(line);
+
+        
+
         if (is_line_suitable(line, line_actual_length, flags, patterns, filename)) {
             
             if (flags->l) {
@@ -245,22 +255,19 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
                 break;
             }
 
-            print_line(line_number, line, line_actual_length, flags, filename);
+            // print_line(line_number, line, line_actual_length, flags, filename);
+            print_line();
         }
         ++line_number;
     }
 
-    free(line);                                                                                             //  because getline allocates memory
+    free(line_info.line.word);                                                                                             //  because getline allocates memory
     fclose(input_file);
 
     if (flags->l && is_file_suitable)
         printf("%s\n", filename);
 
-    // UNUSED_SHIT(line_allocated_length);
-    UNUSED_SHIT(line_number);
-    UNUSED_SHIT(flags);
-    UNUSED_SHIT(is_line_empty);
-    UNUSED_SHIT(patterns);
+
 }
 
 

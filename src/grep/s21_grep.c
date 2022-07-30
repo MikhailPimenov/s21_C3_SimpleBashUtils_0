@@ -2,8 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
 #define UNUSED_SHIT(fucking_unused_shit) do { (void)(fucking_unused_shit); } while (0)
+
+regex_t regex;  //  TODO: initialize it
+int reti = 0;
+char msgbuf[100] = {'\0'};
 
 enum Boolean {
     False,
@@ -60,13 +65,13 @@ void initialize_flags(Flags *flags) {
     flags->print_filename = False;
 }
 
-int is_tab(char symbol) {
-    return symbol == '\t';
-}
+// int is_tab(char symbol) {
+//     return symbol == '\t';
+// }
 
-int is_end_of_file(char symbol) {
-    return symbol == '\n';
-}
+// int is_end_of_file(char symbol) {
+//     return symbol == '\n';
+// }
 
 void print_line_number(int number) {
     printf("%d:", number);                                                                                //  width for line number is 6
@@ -136,17 +141,15 @@ void print_line(int line_number, const char* line, int length, const Flags* flag
 
     if (flags->n)
         print_line_number(line_number);
-
-    // if (flags->o)
-    //     printf("%s", line);    
     
-    if (!flags->o)
-        for (int index = 0; index < length; ++index)
-                printf("%c", line[index]);
-
+    // if (!flags->o)
+        for(int index = 0; index < length; ++index)
+            printf("%c", line[index]);
+           
     UNUSED_SHIT(flags);
     UNUSED_SHIT(is_empty);
     UNUSED_SHIT(line_number);
+    UNUSED_SHIT(length);
 }
 
 int get_string_length(const char* string) {
@@ -401,11 +404,8 @@ int main(int counter, const char **arguments) {
 
     parse(counter, arguments, &flags, &patterns, &filenames, &regexes);
 
-    // if (counter - (flag_counter + 1) > 1)  //  файлов больше одного
-    //     flags.print_filename = True;
-
-
     // TODO: STRUCT TO STORE INDICES FOR FILENAMES
+
 
     printf("\n\n\n\n\n");
     for (int filename_index = 0; filename_index < filenames.counter; ++filename_index) {
@@ -413,15 +413,7 @@ int main(int counter, const char **arguments) {
         read_and_output_file_line_by_line(arguments[filenames.indices[filename_index]], &flags, &patterns);
     }
 
-    // for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
-    //     printf("filename #%d: %s\n", file_index, arguments[file_index]);
-    //     read_and_output_file_line_by_line(arguments[file_index], &flags, &patterns);
-    // }
-    UNUSED_SHIT(counter);
-
-
-
-
+    free(regexes.indices);
     free(patterns.indices);
     free(filenames.indices);
     return -1;

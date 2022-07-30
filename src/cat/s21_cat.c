@@ -12,29 +12,55 @@ enum Boolean {
 typedef struct Flags {
     char b;
     char e;
+    char E;
     char n;
     char s;
     char t;
+    char T;
+    char v;
 } Flags;
 
 void initialize_flags(Flags *flags) {
     flags->b = False;
     flags->e = False;
+    flags->E = False;
     flags->n = False;
     flags->s = False;
     flags->t = False;
+    flags->T = False;
+    flags->v = False;
 }
 
 int is_tab(char symbol) {
     return symbol == '\t';
 }
+
 int is_end_of_line(char symbol) {
     return symbol == '\n';
 }
 
 void print_line_number(int number) {
-    printf("%6d  ", number);                                                                                //  width for line number is 6
+    printf("%6d\t", number);                                                                                //  width for line number is 6
 }
+
+void print_with_unprintable(char symbol) {
+    if (0 <= symbol && symbol <= 31 && !is_tab(symbol) && !is_end_of_line(symbol)) {
+    
+        symbol += 64;
+        printf("^%c", symbol);
+    
+    } else if (symbol == 127) {
+    
+        symbol = '?';
+        printf("^%c", symbol);
+    
+    } else {
+    
+        printf("%c", symbol);
+    
+    }
+}
+
 void print_line(int *line_number, const char* line, int length, const Flags* flags, int* is_empty) {
     if (flags->s && *is_empty && length <= 1)
         return;
@@ -55,11 +81,30 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
     }
 
     for (int index = 0; index < length; ++index) {
+        // if (line[index] == '\0')
+        //     continue;
         if (flags->t && is_tab(line[index])) {
+        // if (flags->t) {
+            // if (is_tab(line[index])) {
+                printf("%s", "^I");
+            // } else {
+                // print_with_unprintable(line[index]);
+            // }
+        } else if (flags->T && is_tab(line[index])) {
             printf("%s", "^I");
         } else if (flags->e && is_end_of_line(line[index])) {
-            printf("%c", '$');
+        // } else if (flags->e) {
+        //     if (is_end_of_line(line[index])) {
+                printf("%c", '$');
+                printf("%c", '\n');
+            // } else {
+                // print_with_unprintable(line[index]);
+            // }
+        } else if (flags->E && is_end_of_line(line[index])) {
+            printf("%c", '$'); 
             printf("%c", '\n');
+        } else if (flags->v || flags->t || flags->e) {
+            print_with_unprintable(line[index]);
         } else {
             printf("%c", line[index]);
         }
@@ -69,9 +114,9 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
     UNUSED_SHIT(flags);
 }
 
-int get_line_length(const char* line) {
+int get_line_length(const char* line) {    
     int length = 0;
-    while (line[length] != '\n')
+    while (line && line[length] && line[length] != '\n')
         ++length;
     ++length;
 
@@ -81,28 +126,30 @@ int get_line_length(const char* line) {
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
-        printf("Failed to open file %s\n", filename);
+        // printf("Failed to open file %s\n", filename);
+        printf("cat: %s: No such file or directory\n", filename);
         return;
     }
 
-    // ssize_t line_actual_length = 0ul;
-    int line_actual_length = 0ul;
+    ssize_t line_actual_length = 0ul;
+    // int line_actual_length = 0ul;
     size_t line_allocated_length = 0l;
-    // char *line = NULL;
-    static const int max_line_length = 500;
-    char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
+    char *line = NULL;
+    // static const int max_line_length = 500;
+    // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = 0;
     while (True)  {                                                                                         //  getline allocates memory
-        // line_actual_length = getline(&line, &line_allocated_length, input_file);
-        const char* result = fgets(line, max_line_length, input_file);
+        line_actual_length = getline(&line, &line_allocated_length, input_file);
+        // const char* result = fgets(line, max_line_length, input_file);
   
-        // if (line_actual_length == EOF) {
-        if (!result) {
+        if (line_actual_length == EOF) {
+        // if (!result) {
             break;
         }
-        line_actual_length = get_line_length(line);
+        // line_actual_length = get_line_length(line);
+        // printf("line_length = %d: ", line_actual_length);
         print_line(&line_number, line, line_actual_length, flags, &is_line_empty);
     }
 
@@ -135,7 +182,7 @@ void print_command_line_arguments(int counter, const char** arguments) {
 
 int get_string_length(const char* string) {
     int length = 0;
-    while (string[length])
+    while (string && string[length])
         ++length;
     return length;
 }
@@ -156,15 +203,14 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* flag_coun
             ++(*flag_counter);
 
         } else if (argument_length == short_flag_length && 
-                  (are_equal("-e", arguments[argument_index], argument_length) ||
-                   are_equal("-E", arguments[argument_index], argument_length))) {
+                   are_equal("-e", arguments[argument_index], argument_length)) {
 
             flags->e = True;
             ++(*flag_counter);
 
         } else if ((argument_length == short_flag_length && 
                     are_equal("-n", arguments[argument_index], argument_length)) || 
-                    (argument_length == get_string_length("--number") && 
+                   (argument_length == get_string_length("--number") && 
                     are_equal("--number", arguments[argument_index], argument_length))) {
 
             flags->n = True;
@@ -179,20 +225,36 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* flag_coun
             ++(*flag_counter);
 
         } else if (argument_length == short_flag_length && 
-                  (are_equal("-t", arguments[argument_index], argument_length) ||
-                   are_equal("-T", arguments[argument_index], argument_length))) {
+                   are_equal("-t", arguments[argument_index], argument_length)) {
 
             flags->t = True;
+            ++(*flag_counter);
+
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-E", arguments[argument_index], argument_length)) {
+
+            flags->E = True;
+            ++(*flag_counter);
+
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-T", arguments[argument_index], argument_length)) {
+
+            flags->T = True;
+            ++(*flag_counter);
+
+        } else if (argument_length == short_flag_length && 
+                   are_equal("-v", arguments[argument_index], argument_length)) {
+
+            flags->v = True;
             ++(*flag_counter);
 
         }
     }
 }
-int main(int counter, const char **arguments) {
-    // int flags = 0;
 
-    // pick_flags(2, arguments, &flags);
-    print_command_line_arguments(counter, arguments);
+int main(int counter, const char **arguments) {
+    // print_command_line_arguments(counter, arguments);
+    // return -1;
 
     Flags flags;
     initialize_flags(&flags);
@@ -202,7 +264,6 @@ int main(int counter, const char **arguments) {
     for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
         read_and_output_file_line_by_line(arguments[file_index], &flags);
     }
-    UNUSED_SHIT(counter);
 
     return 0;
 } // last non-empty line

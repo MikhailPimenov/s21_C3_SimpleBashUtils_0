@@ -9,13 +9,14 @@
             "request": "launch",
             "name": "Debug that shit",
             // "program": "${workspaceFolder}/src/grep/s21_grep.out",
+            "program": "${workspaceFolder}/src/grep/s21_grep",
             // "program": "${workspaceFolder}/src/cat/s21_cat.out",
-            "program": "${workspaceFolder}/src/cat/s21_cat",
+            // "program": "${workspaceFolder}/src/cat/s21_cat",
             // "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
             // "args": ["-e", "${workspaceFolder}/src/cat/bytes.txt"],
-            "args": ["-b", "${workspaceFolder}/texts/test1.txt", "${workspaceFolder}/texts/test3.txt"],
+            // "args": ["-b", "${workspaceFolder}/texts/test1.txt", "${workspaceFolder}/texts/test3.txt"],
             // "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
-            // "args": ["-e", "main", "-e", "define", "-e", "include", "${workspaceFolder}/src/grep/s21_grep.c"],
+            "args": ["-e", "include", "-e", "define", "-e", "main", "${workspaceFolder}/src/grep/s21_grep.c"],
             "cwd": "${workspaceFolder}"
         }
     ]

@@ -72,46 +72,48 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
 
     if (flags->b) {
         if (length > 1) {
+
             print_line_number(*line_number);
             ++(*line_number);
+
         }
     } else if (flags->n) {
+
         print_line_number(*line_number);
         ++(*line_number);
+
     }
 
     for (int index = 0; index < length; ++index) {
-        // if (line[index] == '\0')
-        //     continue;
+
         if (flags->t && is_tab(line[index])) {
-        // if (flags->t) {
-            // if (is_tab(line[index])) {
+        
                 printf("%s", "^I");
-            // } else {
-                // print_with_unprintable(line[index]);
-            // }
+
         } else if (flags->T && is_tab(line[index])) {
+
             printf("%s", "^I");
+
         } else if (flags->e && is_end_of_line(line[index])) {
-        // } else if (flags->e) {
-        //     if (is_end_of_line(line[index])) {
-                printf("%c", '$');
-                printf("%c", '\n');
-            // } else {
-                // print_with_unprintable(line[index]);
-            // }
+
+            printf("%c", '$');
+            printf("%c", '\n');
+
         } else if (flags->E && is_end_of_line(line[index])) {
+
             printf("%c", '$'); 
             printf("%c", '\n');
+
         } else if (flags->v || flags->t || flags->e) {
+
             print_with_unprintable(line[index]);
+
         } else {
+
             printf("%c", line[index]);
+
         }
     }
-    UNUSED_SHIT(line_number);
-    UNUSED_SHIT(is_empty);
-    UNUSED_SHIT(flags);
 }
 
 int get_line_length(const char* line) {    
@@ -126,37 +128,29 @@ int get_line_length(const char* line) {
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
-        // printf("Failed to open file %s\n", filename);
         fprintf(stderr, "cat: %s: No such file or directory\n", filename);
         return;
     }
 
     ssize_t line_actual_length = 0ul;
-    // int line_actual_length = 0ul;
     size_t line_allocated_length = 0l;
     char *line = NULL;
-    // static const int max_line_length = 500;
-    // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
+
 
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = 0;
     while (True)  {                                                                                         //  getline allocates memory
         line_actual_length = getline(&line, &line_allocated_length, input_file);
-        // const char* result = fgets(line, max_line_length, input_file);
   
         if (line_actual_length == EOF) {
-        // if (!result) {
             break;
         }
-        // line_actual_length = get_line_length(line);
-        // printf("line_length = %d: ", line_actual_length);
+
         print_line(&line_number, line, line_actual_length, flags, &is_line_empty);
     }
 
     free(line);                                                                                             //  because getline allocates memory
     fclose(input_file);
-
-    UNUSED_SHIT(line_allocated_length);
 }
 
 int are_equal(const char* string1, const char* string2, int length) {
@@ -254,7 +248,6 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* flag_coun
 
 int main(int counter, const char **arguments) {
     // print_command_line_arguments(counter, arguments);
-    // return -1;
 
     Flags flags;
     initialize_flags(&flags);

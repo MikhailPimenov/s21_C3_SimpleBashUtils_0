@@ -247,13 +247,19 @@ int is_line_suitable(Line* line, const Flags* flags, const Patterns* patterns) {
     return is_suitable;
 }
 
+
+
 int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) {
     int is_suitable = False;
     
     int is_beginning_of_the_line = True;
-    for (int index = 0; index < line->length; ++index) {
 
-        for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
+    int index_from_previous_pattern = 0;
+
+    for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
+    
+        for (int index = index_from_previous_pattern; index < line->length; ++index) {
+
 
             const char* pattern = patterns->words[patterns->indices[pattern_number]];
             const int pattern_length = get_string_length(pattern);
@@ -261,6 +267,9 @@ int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) 
             if (index + pattern_length < line->length) {
 
                 if (are_equal(line->line + index, pattern, pattern_length, flags->i)) {
+
+                    index_from_previous_pattern = index;
+
                     is_suitable = True;
 
                     if (!flags->o || flags->v) {
@@ -269,6 +278,7 @@ int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) 
 
                     //  printing inplace!!!
                     if (is_beginning_of_the_line) {
+
                         if (flags->print_filename && !flags->h)
                             printf("%s:", line->filename);
 

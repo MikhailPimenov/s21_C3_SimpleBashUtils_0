@@ -115,37 +115,37 @@ typedef struct Line {
 
 // int is_found(const char* substring, int sublength, const char* string, int length, const Flags* flags, int* match_counter) {
 // int find_pattern_and_print_line(const Line* line, const char* string, int length, const Flags* flags, int* match_counter) {
-int is_pattern_found_and_print_inplace(const Line* line, const char* pattern, int pattern_length, const Flags* flags, int* is_beginning_of_the_line) {
-    int result = False;
+// int is_pattern_found_and_print_inplace(const Line* line, const char* pattern, int pattern_length, const Flags* flags, int* is_beginning_of_the_line) {
+//     int result = False;
 
-    // int is_beginning_of_the_line = True;
-    for (int index = 0; index < line->length - pattern_length; ++index) {
+//     // int is_beginning_of_the_line = True;
+//     for (int index = 0; index < line->length - pattern_length; ++index) {
 
 
-        if (are_equal(pattern, line->line + index, pattern_length, flags->i)) {
-            result = True;
+//         if (are_equal(pattern, line->line + index, pattern_length, flags->i)) {
+//             result = True;
 
-            if (!flags->o || flags->v) {
-                break;
-            }
+//             if (!flags->o || flags->v) {
+//                 break;
+//             }
 
-            //  printing inplace!!!
-            if (*is_beginning_of_the_line) {
-                if (flags->print_filename && !flags->h)
-                    printf("%s:", line->filename);
+//             //  printing inplace!!!
+//             if (*is_beginning_of_the_line) {
+//                 if (flags->print_filename && !flags->h)
+//                     printf("%s:", line->filename);
 
-                if (flags->n)
-                    print_line_number(line->line_number);
+//                 if (flags->n)
+//                     print_line_number(line->line_number);
 
-                *is_beginning_of_the_line = False;
-            }
+//                 *is_beginning_of_the_line = False;
+//             }
 
-            printf("%s\n", pattern);
-        }
-    }
+//             printf("%s\n", pattern);
+//         }
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
 // int is_pattern_found2(const char* line, int line_length, const char* pattern, int pattern_length, const Flags* flags, int* is_beginning_of_the_line) {
 //     int result = False;
@@ -222,32 +222,45 @@ int get_line_length(const char* string) {
     return length;    
 }
 
-int is_line_suitable(Line* line, const Flags* flags, const Patterns* patterns) {
-    int is_suitable = False;
+// int is_line_suitable(Line* line, const Flags* flags, const Patterns* patterns) {
+//     int is_suitable = False;
     
-    int is_beginning_of_the_line = True;
-    for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
-        const char* pattern = patterns->words[patterns->indices[pattern_number]];
-        const int pattern_length = get_string_length(pattern);
+//     int is_beginning_of_the_line = True;
+//     for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
+//         const char* pattern = patterns->words[patterns->indices[pattern_number]];
+//         const int pattern_length = get_string_length(pattern);
 
-        if (is_pattern_found_and_print_inplace(line, pattern, pattern_length, flags, &is_beginning_of_the_line)) {
-            is_suitable = True;
+//         if (is_pattern_found_and_print_inplace(line, pattern, pattern_length, flags, &is_beginning_of_the_line)) {
+//             is_suitable = True;
 
 
-            //  remove it to copy grep's wrong behaviour
-            // if (!flags->o) {
-            //     break;
-            // }
-        }
+//             //  remove it to copy grep's wrong behaviour
+//             // if (!flags->o) {
+//             //     break;
+//             // }
+//         }
+//     }
+
+//     if (flags->v)
+//         is_suitable = !is_suitable;
+
+//     return is_suitable;
+// }
+
+void print_for_o(const Line* line, const Flags* flags, const char* matched_pattern, int* is_beginning_of_the_line) {
+    if (*is_beginning_of_the_line) {
+
+        if (flags->print_filename && !flags->h)
+            printf("%s:", line->filename);
+
+        if (flags->n)
+            print_line_number(line->line_number);
+
+        *is_beginning_of_the_line = False;
     }
 
-    if (flags->v)
-        is_suitable = !is_suitable;
-
-    return is_suitable;
+    printf("%s\n", matched_pattern);
 }
-
-
 
 int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) {
     int is_suitable = False;
@@ -256,10 +269,10 @@ int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) 
 
     int index_from_previous_pattern = 0;
 
-    for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
-    
-        for (int index = index_from_previous_pattern; index < line->length; ++index) {
+        for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
+    for (int index = index_from_previous_pattern; index < line->length; ++index) {
 
+    
 
             const char* pattern = patterns->words[patterns->indices[pattern_number]];
             const int pattern_length = get_string_length(pattern);
@@ -272,28 +285,11 @@ int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) 
 
                     is_suitable = True;
 
-                    if (!flags->o || flags->v) {
+                    if (!flags->o || flags->v || flags->c) {
                         break;
                     }
 
-                    //  printing inplace!!!
-                    if (is_beginning_of_the_line) {
-
-                        if (flags->print_filename && !flags->h)
-                            printf("%s:", line->filename);
-
-                        if (flags->n)
-                            print_line_number(line->line_number);
-
-                        is_beginning_of_the_line = False;
-                    }
-
-                    printf("%s\n", pattern);
-
-                    //  remove it to copy grep's wrong behaviour
-                    // if (!flags->o) {
-                    //     break;
-                    // }
+                    print_for_o(line, flags, pattern, &is_beginning_of_the_line);
                 }
             }  
         }
@@ -369,7 +365,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
                 break;
             }
 
-            if (!flags->o || flags->v)
+            if ((!flags->o || flags->v) && !flags->c)
                 // print_line(line_number, line, line_actual_length, flags, filename);
                 print_line(&line, flags);
             // print_line();
@@ -379,6 +375,11 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
 
     free(line_for_getline);                                                                                             //  because getline allocates memory
     fclose(input_file);
+
+    if (flags->c) {
+        printf("%s:", filename);
+        printf("%d\n", suitable_line_counter);
+    }
 
     if (flags->l && is_file_suitable)
         printf("%s\n", filename);
@@ -467,8 +468,9 @@ void parse(int counter, const char** arguments, Flags* flags, Patterns* patterns
 
             ++argument_index;
 
-            // assert(0 && "NOT IMPLEMENTED FILENAME STORAGE FOR REGEX!");
+            assert(0 && "NOT IMPLEMENTED REGEX!");
             //  TODO: store somewhere filename for regex!!!
+
 
         } else if (argument_length == short_flag_length && 
                    are_equal("-o", arguments[argument_index], argument_length, False)) {

@@ -269,13 +269,12 @@ int is_line_suitable2(Line* line, const Flags* flags, const Patterns* patterns) 
 
     int index_from_previous_pattern = 0;
 
-        for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
-    for (int index = index_from_previous_pattern; index < line->length; ++index) {
+    for (int pattern_number = 0; pattern_number < patterns->counter; ++pattern_number) {
 
-    
+        const char* pattern = patterns->words[patterns->indices[pattern_number]];
+        const int pattern_length = get_string_length(pattern);
 
-            const char* pattern = patterns->words[patterns->indices[pattern_number]];
-            const int pattern_length = get_string_length(pattern);
+        for (int index = index_from_previous_pattern; index < line->length; ++index) {
 
             if (index + pattern_length < line->length) {
 

@@ -127,7 +127,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags)
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
         // printf("Failed to open file %s\n", filename);
-        printf("cat: %s: No such file or directory\n", filename);
+        fprintf(stderr, "cat: %s: No such file or directory\n", filename);
         return;
     }
 

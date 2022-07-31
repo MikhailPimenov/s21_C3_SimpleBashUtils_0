@@ -196,13 +196,8 @@ void print_line(const Line* line, const Flags* flags) {
     if (flags->n)
         print_line_number(line->line_number);
 
-
-    if (flags->o)
-        for (int index = 0; index < line->match_counter; ++index)
-            printf("%s\n", line->pattern_word);
-    else
-        for(int index = 0; index < line->length; ++index)
-            printf("%c", line->line[index]);
+    for(int index = 0; index < line->length; ++index)
+        printf("%c", line->line[index]);
 
 }
 
@@ -334,6 +329,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     
         
     int is_file_suitable = False;
+    int suitable_line_counter = 0;
     while (True)  {                                                                                         //  getline allocates memory
 
         line_actual_length = getline(&line_for_getline, &line_allocated_length, input_file);
@@ -357,13 +353,13 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
 
         // if (is_line_suitable(line_for_getline, line_actual_length, flags, patterns, filename)) {
         if (is_line_suitable2(&line, flags, patterns)) {
-            
+            ++suitable_line_counter;
             if (flags->l) {
                 is_file_suitable = True;
                 break;
             }
 
-            if (!flags->o)
+            if (!flags->o || flags->v)
                 // print_line(line_number, line, line_actual_length, flags, filename);
                 print_line(&line, flags);
             // print_line();

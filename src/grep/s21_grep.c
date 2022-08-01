@@ -511,9 +511,60 @@ void initialize_regexes(Regexes* regexes) {
     regexes->regexes = NULL;
 }
 
+int get_file_character_count(const char* filename) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "No file %s\n", filename);
+        return -1;
+    }
+
+    int counter = 1;
+
+    while (fgetc(file) != EOF)
+        ++counter;
+
+    fclose(file);
+    return counter - 1;
+}
+
+int get_file_line_count(const char* filename) {
+    FILE* file = fopen(filename, "r");
+
+    if (!file) {
+        fprintf(stderr, "No file %s\n", filename);
+        return -1;
+    }
+
+    int counter = 1;
+    while (True) {
+        const int symbol = fgetc(file);
+
+        if (symbol == '\n')
+            ++counter;
+
+        if (symbol == EOF) {
+            break;
+        }
+    }
+
+    fclose(file);
+    return counter;
+}
+
+typedef struct File {
+    char* data;
+    char** line;
+
+    int character_count;
+    int line_count;
+} File;
 
 int main(int counter, const char **arguments) {
     print_command_line_arguments(counter, arguments);
+
+    const int length = get_file_character_count("regex_patterns.txt");
+    const int line_count = get_file_line_count("regex_patterns.txt");
+    printf("length = %d\nlines = %d\n", length, line_count);
 
     Flags flags;
     initialize_flags(&flags);

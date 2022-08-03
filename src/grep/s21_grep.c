@@ -551,15 +551,135 @@ int get_file_line_count(const char* filename) {
     return counter;
 }
 
-typedef struct File {
-    char* data;
-    char** line;
 
-    int character_count;
+typedef struct File {
+    int* data;
+    int file_length;
+
+    int** line;
     int line_count;
 } File;
 
+void initialize_file_struct(File* file_struct) {
+    file_struct->data = NULL;
+    file_struct->file_length = -1;
+
+    file_struct->line = NULL;
+    file_struct->line_count = -1;
+}
+
+void set_struct_from_file_allocate(const char* filename, File* file_struct) {
+ 
+    int success = True;
+
+    const int file_length = get_file_character_count(filename);
+    const int line_count = get_file_line_count(filename);
+
+    if (file_length == -1 || line_count == -1) {
+        success = False;
+    }
+
+    if (success) {
+        file_struct->data = malloc(file_length * sizeof(int));  //  character as int not char
+
+        if (!file_struct->data)
+            success = False;
+        
+        if (success) {
+            file_struct->line = malloc(line_count * sizeof(int*));  
+
+            if (!file_struct->line)
+                success = False;
+            
+            if (success) {
+                FILE* file = fopen(filename, "r");
+
+                if (!file)
+                    success = False;
+
+                if (success) {
+
+                    int symbol_index = 0;
+                    int line_index = 0;
+
+                    file_struct->line[0] = file_struct->data;
+                    ++line_index;
+
+                    int is_previous_newline = False;
+                    while (True) {
+                        const int symbol = fgetc(file);
+
+                        if (symbol == EOF) {
+                            file_struct->data[symbol_index] = EOF;
+                            break;
+                        }
+
+                        file_struct->data[symbol_index] = symbol;  // записываем по одному символу
+
+                        if (is_previous_newline) {
+                            file_struct->line[line_index] = file_struct->data + symbol_index;
+                            ++line_index;
+                        }
+                        is_previous_newline = False;
+
+                        if (symbol == '\n')
+                            is_previous_newline = True;
+                        
+                        ++symbol_index;
+                    }
+
+                    file_struct->file_length = file_length;
+                    file_struct->line_count = line_count;
+                }
+
+                if (file)
+                    fclose(file);
+            }
+        }
+    }
+}
+
+void free_file_struct(File* file_struct) {
+    if (file_struct->data)
+        free(file_struct->data);
+    
+    if (file_struct->line)
+        free(file_struct->line);
+
+    file_struct->file_length = -1;
+    file_struct->line_count = -1;
+}
+
+void print_file_struct(const File* file_struct) {
+    printf("begin:\n");
+
+    for (int line_index = 0; line_index < file_struct->line_count; ++line_index) {
+        int symbol_index = 0;
+        
+        while (True) {
+            const int symbol = file_struct->line[line_index][symbol_index];
+            if (symbol == '\n' || symbol == EOF)
+                break;
+            printf("%c", symbol);
+            ++symbol_index;
+        }
+
+        printf("\n");
+    }
+
+    printf("end:\n");
+}
+
 int main(int counter, const char **arguments) {
+    File file_struct;
+    initialize_file_struct(&file_struct);
+    free_file_struct(&file_struct);
+
+    // set_struct_from_file_allocate("s21_grep.c", &file_struct);
+    set_struct_from_file_allocate("regex_patterns2.txt", &file_struct);
+    print_file_struct(&file_struct);
+    return -1488;
+
     print_command_line_arguments(counter, arguments);
 
     const int length = get_file_character_count("regex_patterns.txt");
@@ -603,7 +723,6 @@ int main(int counter, const char **arguments) {
     parse(counter, arguments, &flags, &patterns, &filenames, &regexes);
 
     // TODO: STRUCT TO STORE INDICES FOR FILENAMES
-
 
     printf("\n\n\n\n\n");
     for (int filename_index = 0; filename_index < filenames.counter; ++filename_index) {

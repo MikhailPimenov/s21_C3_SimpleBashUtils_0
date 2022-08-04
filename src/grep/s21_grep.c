@@ -422,7 +422,7 @@ void initialize_regexes(RegexesFilenames* regexes) {
     regexes->indices = NULL;
     regexes->counter = 0;
 
-    regexes->regexes = NULL;
+    // regexes->regexes = NULL;
 }
 
 int get_file_character_count(const char* filename) {
@@ -438,7 +438,7 @@ int get_file_character_count(const char* filename) {
         ++counter;
 
     fclose(file);
-    return counter - 1;
+    return counter;
 }
 
 int get_file_line_count(const char* filename) {
@@ -467,10 +467,10 @@ int get_file_line_count(const char* filename) {
 
 
 typedef struct File {
-    int* data;
+    char* data;
     int file_length;
 
-    int** line;
+    char** line;
     int line_count;
 } File;
 
@@ -494,13 +494,13 @@ void set_struct_from_file_allocate(const char* filename, File* file_struct) {
     }
 
     if (success) {
-        file_struct->data = malloc(file_length * sizeof(int));  //  character as int not char
+        file_struct->data = malloc(file_length * sizeof(char));  //  character as int not char
 
         if (!file_struct->data)
             success = False;
         
         if (success) {
-            file_struct->line = malloc(line_count * sizeof(int*));  
+            file_struct->line = malloc(line_count * sizeof(char*));  
 
             if (!file_struct->line)
                 success = False;
@@ -524,11 +524,11 @@ void set_struct_from_file_allocate(const char* filename, File* file_struct) {
                         const int symbol = fgetc(file);
 
                         if (symbol == EOF) {
-                            file_struct->data[symbol_index] = EOF;
+                            file_struct->data[symbol_index] = '\0';
                             break;
                         }
 
-                        file_struct->data[symbol_index] = symbol;  // записываем по одному символу
+                        file_struct->data[symbol_index] = (char)symbol;  // записываем по одному символу
 
                         if (is_previous_newline) {
                             file_struct->line[line_index] = file_struct->data + symbol_index;
@@ -536,8 +536,10 @@ void set_struct_from_file_allocate(const char* filename, File* file_struct) {
                         }
                         is_previous_newline = False;
 
-                        if (symbol == '\n')
+                        if (symbol == '\n') {
                             is_previous_newline = True;
+                            file_struct->data[symbol_index] = '\0';
+                        }
                         
                         ++symbol_index;
                     }
@@ -554,11 +556,15 @@ void set_struct_from_file_allocate(const char* filename, File* file_struct) {
 }
 
 void free_file_struct(File* file_struct) {
-    if (file_struct->data)
+    if (file_struct->data) {
         free(file_struct->data);
+        file_struct->data = NULL;
+    }
     
-    if (file_struct->line)
+    if (file_struct->line) {
         free(file_struct->line);
+        file_struct->line = NULL;
+    }
 
     file_struct->file_length = -1;
     file_struct->line_count = -1;
@@ -567,73 +573,92 @@ void free_file_struct(File* file_struct) {
 void print_file_struct(const File* file_struct) {
     printf("begin:\n");
 
-    for (int line_index = 0; line_index < file_struct->line_count; ++line_index) {
-        int symbol_index = 0;
-        
-        while (True) {
-            const int symbol = file_struct->line[line_index][symbol_index];
-            if (symbol == '\n' || symbol == EOF)
-                break;
-            printf("%c", symbol);
-            ++symbol_index;
-        }
-
-        printf("\n");
-    }
+    for (int line_index = 0; line_index < file_struct->line_count; ++line_index)
+        printf("%s\n", file_struct->line[line_index]);
 
     printf("end:\n");
 }
 
 
-void set_list_of_regexes_allocate(RegexList* list, int counter, const char** arguments, const RegexesFilenames* regexes_filenames) {
-    int total_line_counter = 0;
+void set_list_of_regexes_allocate(File* giant_file_struct, const RegexesFilenames* regexes_filenames) {
+    int total_line_count = 0;
+    int total_character_count = 0;
     for (int filename_index = 0; filename_index < regexes_filenames->counter; ++filename_index) {
         const char* filename = regexes_filenames->words[regexes_filenames->indices[filename_index]];
 
-        total_line_counter += get_file_line_count(filename);
+        total_line_count += get_file_line_count(filename);
+        total_character_count += get_file_character_count(filename);
     }
-
-    list->line = malloc(total_line_counter * sizeof(RegexLine));
-    list->length = total_line_counter;
 
     int success = True;
 
-    if (!list->line) 
+    giant_file_struct->data = malloc(total_character_count * sizeof(char));
+
+    if (!giant_file_struct->data)
         success = False;
-    
+
     if (success) {
 
-        for (int filename_index = 0; filename_index < regexes_filenames->counter; ++filename_index) {
-            
-            const char* filename = regexes_filenames->words[regexes_filenames->indices[filename_index]];
+        giant_file_struct->line = malloc(total_line_count * sizeof(char));
+        if (!giant_file_struct->line)
+            success = False;
+        
+        giant_file_struct->line[0] = giant_file_struct->data;
+        giant_file_struct->file_length = total_character_count;
+        giant_file_struct->line_count = total_line_count;
 
-            File file_struct;
-            initialize_file_struct(&file_struct);
-            set_struct_from_file_allocate(filename, &file_struct);
+        int line_index = 0;
+        ++line_index;
+        int character_shift = 0;
 
 
-            for (int line_index = 0; line_index < file_struct.line_count; ++line_index) {
+
+        if (success) {
+
+            for (int filename_index = 0; filename_index < regexes_filenames->counter; ++filename_index) {
                 
-                list->line = malloc(sizeof())
+                const char* filename = regexes_filenames->words[regexes_filenames->indices[filename_index]];
+
+                File file_struct;
+                initialize_file_struct(&file_struct);
+                set_struct_from_file_allocate(filename, &file_struct);
+                // print_file_struct(&file_struct);
 
 
+                for (int character_index = 0; character_index < file_struct.file_length; ++character_index) {
+                    const char symbol = file_struct.data[character_index];
+
+                    assert(character_index + character_shift < total_character_count);
+                    giant_file_struct->data[character_index + character_shift] = symbol;
+              
+                    if (!symbol && line_index < total_line_count) {
+                        assert(character_index + character_shift + 1 < total_character_count);
+                        assert(line_index < total_line_count);
+                        giant_file_struct->line[line_index] = giant_file_struct->data + character_index + character_shift + 1;
+                        ++line_index;
+                    }
+                }
+
+                character_shift += file_struct.file_length;
+                free_file_struct(&file_struct);
             }
-
-
-            free_file_struct(&file_struct);
         }
+    
     }
+
+    if (!success)
+        free_file_struct(giant_file_struct);
     
 }
 
 int main(int counter, const char **arguments) {
     // File file_struct;
     // initialize_file_struct(&file_struct);
-    // free_file_struct(&file_struct);
 
     // set_struct_from_file_allocate("s21_grep.c", &file_struct);
-    // //set_struct_from_file_allocate("regex_patterns2.txt", &file_struct);
+    // // //set_struct_from_file_allocate("regex_patterns2.txt", &file_struct);
     // print_file_struct(&file_struct);
+    // free_file_struct(&file_struct);
     // return -14/88;
 
 
@@ -641,7 +666,7 @@ int main(int counter, const char **arguments) {
     // const int line_count = get_file_line_count("regex_patterns.txt");
     // printf("length = %d\nlines = %d\n", length, line_count);
 
-    print_command_line_arguments(counter, arguments);
+    // print_command_line_arguments(counter, arguments);
 
     // int number_in_list = 0;
 
@@ -685,18 +710,20 @@ int main(int counter, const char **arguments) {
 
     printf("\n\n\n\n\n");
 
-    RegexLine list;
-    initialize_regex_line(&list);
+    File all_regexes;
+    initialize_file_struct(&all_regexes);
 
-    set_list_of_regexes_allocate(&list, counter, arguments, &regexes_filenames);
+    set_list_of_regexes_allocate(&all_regexes, &regexes_filenames);
+    // print_file_struct(&all_regexes);
 
     for (int filename_index = 0; filename_index < filenames.counter; ++filename_index) {
         printf("%d) file to be opened: %s\n", filename_index, arguments[filenames.indices[filename_index]]);
         read_and_output_file_line_by_line(arguments[filenames.indices[filename_index]], &flags, &patterns);
     }
 
+
     free(regexes_filenames.indices);
     free(patterns.indices);
     free(filenames.indices);
-    return -1;
+    return 0;
 } // last non-empty line

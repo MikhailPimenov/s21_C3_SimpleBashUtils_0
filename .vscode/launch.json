@@ -16,7 +16,8 @@
             // "args": ["-e", "${workspaceFolder}/src/cat/bytes.txt"],
             // "args": ["-b", "${workspaceFolder}/texts/test1.txt", "${workspaceFolder}/texts/test3.txt"],
             // "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
-            "args": ["-e", "include", "-e", "define", "-e", "main", "${workspaceFolder}/src/grep/s21_grep.c"],
+            // "args": ["-e", "include", "-e", "define", "-e", "main", "${workspaceFolder}/src/grep/s21_grep.c"],
+            "args": ["-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns2.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "${workspaceFolder}/src/grep/s21_grep.c"],
             "cwd": "${workspaceFolder}"
         }
     ]

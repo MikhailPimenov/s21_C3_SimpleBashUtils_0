@@ -94,7 +94,7 @@ void initialize_flags(Flags *flags) {
 }
 
 void print_line_number(int number) {
-    printf("%d:", number);                                                                                //  width for line number is 6
+    printf("%d:", number);                                                                     
 }
 
 int are_equal(const char* string1, const char* string2, int length, int ignore_case) {

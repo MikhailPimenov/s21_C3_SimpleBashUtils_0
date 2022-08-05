@@ -4,36 +4,10 @@
 #include <string.h>
 #include <regex.h>
 
-#define UNUSED_SHIT(fucking_unused_shit) do { (void)(fucking_unused_shit); } while (0)
-
-regex_t regex;  //  TODO: initialize it
-int reti = 0;
-char msgbuf[100] = {'\0'};
-
 enum Boolean {
     False,
     True
 };
-
-typedef struct RegexesFilenames {
-    const char** words;
-    int* indices;
-    int counter;
-
-    // const char** regexes;
-} RegexesFilenames;
-
-typedef struct Patterns {
-    const char** words;                                                                                //  a.k.a. command line arguments
-    int *indices;
-    int counter;
-} Patterns;
-
-typedef struct Filenames {
-    const char** words;
-    int* indices;
-    int counter;
-} Filenames;
 
 typedef struct Flags {
     char e;
@@ -51,15 +25,15 @@ typedef struct Flags {
 } Flags;
 
 
-typedef struct File {
+typedef struct FileStruct {
     char* data;
     int file_length;
 
     char** line;
     int line_count;
-} File;
+} FileStruct;
 
-enum Types {
+enum ArgumentTypes {
     ONLY_FLAG_T = 0,
     PATTERN_T = 1,
     FILENAME_T = 2,
@@ -95,14 +69,14 @@ void free_arguments_struct(Arguments* arguments_struct) {
     arguments_struct->counter = 0;
 }
 
-void print_file_struct(const File* file_struct) {
-    printf("begin:\n");
+// void print_file_struct(const FileStruct* file_struct) {
+//     printf("begin:\n");
 
-    for (int line_index = 0; line_index < file_struct->line_count; ++line_index)
-        printf("%s\n", file_struct->line[line_index]);
+//     for (int line_index = 0; line_index < file_struct->line_count; ++line_index)
+//         printf("%s\n", file_struct->line[line_index]);
 
-    printf("end:\n");
-}
+//     printf("end:\n");
+// }
 
 void initialize_flags(Flags *flags) {
     flags->e = False;
@@ -140,7 +114,6 @@ int are_equal(const char* string1, const char* string2, int length, int ignore_c
     }
     return True;
 }
-
 
 typedef struct Line {
     const char* line;
@@ -203,37 +176,7 @@ void print_for_o(const Line* line, int begin, int end, const Flags* flags, int* 
     printf("\n");
 }
 
-
-// enum TypeToSeek {
-//     NO_TYPE_T = -1,
-//     PATTERN_T = 0,
-//     REGEX_T = 1
-// };
-
-// typedef struct RegexLine {
-//     char* word;
-//     int length;
-//     int type;
-// } RegexLine;
-
-// typedef struct RegexList {
-//     RegexLine* line;    
-//     int length;
-// } RegexList;
-
-// void initialize_regex_line(RegexLine* regex_line) {
-//     regex_line->word = NULL;
-//     regex_line->length = -1;
-//     regex_line->type = NO_TYPE_T;
-// }
-
-// void initialize_regex_list(RegexList* regex_list) {
-//     regex_list->line = NULL;
-//     regex_list->length = -1;
-// }
-
-int is_line_suitable2(Line* line, const Flags* flags, const Arguments* argument_struct, const File* all_regexes) {
-    // print_file_struct(all_regexes);
+int is_line_suitable_and_print_o(Line* line, const Flags* flags, const Arguments* argument_struct, const FileStruct* all_regexes) {
     int is_suitable = False;
 
     int is_beginning_of_the_line = True;
@@ -280,7 +223,7 @@ int is_line_suitable2(Line* line, const Flags* flags, const Arguments* argument_
     for (int regex_number = 0; regex_number < all_regexes->line_count; ++regex_number) {
 
         const char* regex_word = all_regexes->line[regex_number];
-
+        
         int compile_result = -1;
 
         if (flags->i)
@@ -342,9 +285,7 @@ void initialize_line(Line* line) {
     line->filename = NULL;
 }
 
-
-// void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Patterns* patterns, const File* all_regexes) {
-void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Arguments* arguments_struct, const File* all_regexes) {
+void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Arguments* arguments_struct, const FileStruct* all_regexes) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
         if (!flags->s)  
@@ -353,30 +294,20 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     }
 
     ssize_t line_actual_length = 0ul;
-    // int line_actual_length = 0;
     size_t line_allocated_length = 0l;
     char *line_for_getline = NULL;
-    // static const int max_line_length = 500;
-    // char *line = malloc(max_line_length * sizeof(char));                                                    //  can be replaced with static array
 
     int line_number = 1;                                                                                    //  first line has number '1'
     
-    
-        
     int is_file_suitable = False;
     int suitable_line_counter = 0;
     while (True)  {                                                                                         //  getline allocates memory
 
         line_actual_length = getline(&line_for_getline, &line_allocated_length, input_file);
-        
-        // printf("read_file_and_output...: %s\n", line);
-        // const char* result = fgets(line, max_line_length, input_file);
   
         if (line_actual_length == EOF) {
-        // if (!result) {
             break;
         }
-        // line_actual_length = get_line_length(line);
 
         Line line;
         initialize_line(&line);
@@ -386,8 +317,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
         line.line_number = line_number;
         line.filename = filename;
 
-        // if (is_line_suitable(line_for_getline, line_actual_length, flags, patterns, filename)) {
-        if (is_line_suitable2(&line, flags, arguments_struct, all_regexes)) {
+        if (is_line_suitable_and_print_o(&line, flags, arguments_struct, all_regexes)) {
             ++suitable_line_counter;
             if (flags->l) {
                 is_file_suitable = True;
@@ -395,9 +325,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
             }
 
             if ((!flags->o || flags->v) && !flags->c)
-                // print_line(line_number, line, line_actual_length, flags, filename);
                 print_line(&line, flags);
-            // print_line();
         }
         ++line_number;
     }
@@ -413,20 +341,14 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     if (flags->l && is_file_suitable)
         printf("%s\n", filename);
 
-
 }
 
+// void print_command_line_arguments(int counter, const char** arguments) {
+//     for (int index = 0; index < counter; ++index) {
+//         printf("%d - %s\n", index, arguments[index]);
+//     }
+// }
 
-
-void print_command_line_arguments(int counter, const char** arguments) {
-    for (int index = 0; index < counter; ++index) {
-        printf("%d - %s\n", index, arguments[index]);
-    }
-}
-
-
-
-// void parse(int counter, const char** arguments, Flags* flags, Patterns* patterns, Filenames* filenames, RegexesFilenames* regexes) {
 void parse(int counter, const char** arguments, Flags* flags, Arguments* arguments_struct) {
     arguments_struct->counter = counter;
 
@@ -439,7 +361,9 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
         if (argument[0] == '-') {
  
             for (int index = 1; index < argument_length; ++index) {
+                
                 if (argument[index] == 'e') {
+
                     flags->e = True;
 
                     if (index == argument_length - 1 ) {
@@ -449,11 +373,6 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
                             arguments_struct->word[argument_index + 1] = arguments[argument_index + 1];
                             arguments_struct->type[argument_index + 1] = PATTERN_T;
 
-                            printf("pattern #%d: %s\n", argument_index + 1, arguments[argument_index + 1]);
-                            printf("pattern #%d: %s\n", argument_index + 1, arguments_struct->word[argument_index + 1]);
-                        
-         
-                            
                             ++argument_index;
 
                         } else {
@@ -465,12 +384,6 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
 
                         arguments_struct->word[argument_index] = arguments[argument_index] + index + 1;
                         arguments_struct->type[argument_index] = PATTERN_T;
-
-                        printf("pattern argument #%d: %s\n", argument_index, arguments[argument_index] + index + 1);
-                        printf("pattern pattern  #%d: %s\n", argument_index, arguments_struct->word[argument_index]);
-
-            
-
                         
                     }
                     
@@ -492,8 +405,6 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
                     flags->s = True;
                 } else if (argument[index] == 'f') {
                     
-                    
-
                     flags->f = True;
 
                     if (index == argument_length - 1 ) {
@@ -503,33 +414,23 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
                             arguments_struct->word[argument_index + 1] = arguments[argument_index + 1];
                             arguments_struct->type[argument_index + 1] = REGEX_FILENAME_T;
                             
-                            printf("rexeg filename argument #%d: %s\n", argument_index + 1, arguments[argument_index + 1]);
-                            printf("regex filename regex    #%d: %s\n", argument_index + 1, arguments_struct->word[argument_index + 1]);
-                            
                             ++argument_index;
 
                         } else {
 
                             fprintf(stderr, "grep: option requires an argument -- f");
-                        
+
                         }
 
                     } else {
 
                         arguments_struct->word[argument_index] = arguments[argument_index] + index + 1;
                         arguments_struct->type[argument_index] = REGEX_FILENAME_T;
-
-                        printf("rexeg filename argument #%d: %s\n", argument_index, arguments[argument_index] + index + 1);
-                        printf("regex filename regex    #%d: %s\n", argument_index, arguments_struct->word[argument_index]);
-
-
                         
                     }
                     
                     break;
 
-
-                    
                 } else if (argument[index] == 'o') {
 
                     flags->o = True;
@@ -546,92 +447,10 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
             arguments_struct->word[argument_index] = arguments[argument_index];
             arguments_struct->type[argument_index] = FILENAME_T;
 
-            printf("filename argument #%d: %s\n", argument_index, arguments[argument_index]);
-            printf("filename filename #%d: %s\n", argument_index, arguments_struct->word[argument_index]);
-
             ++filename_counter;
 
         }
 
-        
-
-        // if (argument_length == short_flag_length && 
-        //     are_equal("-e", arguments[argument_index], argument_length, False)) {
-
-        //     flags->e = True;
-
-        //     printf("pattern #%d: %s\n", argument_index + 1, arguments[argument_index + 1]);
-        //     patterns->indices[pattern_index] = argument_index + 1;  //  because pattern goes right after -e, so its index is +1
-        //     printf("pattern #%d: %s\n", patterns->indices[pattern_index], patterns->words[patterns->indices[pattern_index]]);
-        //     ++pattern_index;
-        //     ++(patterns->counter);
-
-        //     ++argument_index;
-
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-i", arguments[argument_index], argument_length, False)) {
-
-        //     flags->i = True;
-
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-v", arguments[argument_index], argument_length, False)) {
-
-        //     flags->v = True;
-        
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-c", arguments[argument_index], argument_length, False)) {
-
-        //     flags->c = True;
-        
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-l", arguments[argument_index], argument_length, False)) {
-
-        //     flags->l = True;
-        
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-n", arguments[argument_index], argument_length, False)) {
-
-        //     flags->n = True;
-        
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-h", arguments[argument_index], argument_length, False)) {
-
-        //     flags->h = True;
-        
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-s", arguments[argument_index], argument_length, False)) {
-
-        //     flags->s = True;
-        
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-f", arguments[argument_index], argument_length, False)) {
-
-        //     flags->f = True;
-
-        //     printf("regex file #%d: %s\n", argument_index + 1, arguments[argument_index + 1]);
-        //     regexes->indices[regex_filename_index] = argument_index + 1;  //  because regex filename goes right after -f, so its index is +1
-        //     printf("regex file #%d: %s\n", regexes->indices[regex_filename_index], regexes->words[regexes->indices[regex_filename_index]]);
-        //     ++regex_filename_index;
-        //     ++(regexes->counter);
-
-        //     ++argument_index;
-
-        //     //  assert(0 && "NOT IMPLEMENTED REGEX!");
-        //     //  TODO: store somewhere filename for regex!!!
-
-
-        // } else if (argument_length == short_flag_length && 
-        //            are_equal("-o", arguments[argument_index], argument_length, False)) {
-
-        //     flags->o = True;
-        
-        // } else {
-        //     printf("filename #%d: %s\n", argument_index, arguments[argument_index]);
-        //     filenames->indices[filename_index] = argument_index;
-        //     printf("filename #%d: %s\n", filenames->indices[filename_index], filenames->words[filenames->indices[filename_index]]);
-        //     ++filename_index;
-        //     ++(filenames->counter);
-        // }
     }
 
     if (!flags->e && !flags->f)
@@ -682,10 +501,7 @@ int get_file_line_count(const char* filename) {
     return counter;
 }
 
-
-
-
-void initialize_file_struct(File* file_struct) {
+void initialize_file_struct(FileStruct* file_struct) {
     file_struct->data = NULL;
     file_struct->file_length = -1;
 
@@ -693,7 +509,7 @@ void initialize_file_struct(File* file_struct) {
     file_struct->line_count = -1;
 }
 
-void set_struct_from_file_allocate(const char* filename, File* file_struct) {
+void set_struct_from_file_allocate(const char* filename, FileStruct* file_struct) {
  
     int success = True;
 
@@ -766,7 +582,7 @@ void set_struct_from_file_allocate(const char* filename, File* file_struct) {
     }
 }
 
-void free_file_struct(File* file_struct) {
+void free_file_struct(FileStruct* file_struct) {
     if (file_struct->data) {
         free(file_struct->data);
         file_struct->data = NULL;
@@ -781,10 +597,7 @@ void free_file_struct(File* file_struct) {
     file_struct->line_count = -1;
 }
 
-
-
-
-void set_list_of_regexes_allocate(File* giant_file_struct, const Arguments* arguments_struct) {
+void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments* arguments_struct) {
     int total_line_count = 0;
     int total_character_count = 0;
 
@@ -829,7 +642,7 @@ void set_list_of_regexes_allocate(File* giant_file_struct, const Arguments* argu
 
                     const char* filename = arguments_struct->word[filename_index];
 
-                    File file_struct;
+                    FileStruct file_struct;
                     initialize_file_struct(&file_struct);
                     set_struct_from_file_allocate(filename, &file_struct);
 
@@ -861,10 +674,8 @@ void set_list_of_regexes_allocate(File* giant_file_struct, const Arguments* argu
     
 }
 
-
-
 int main(int counter, const char **arguments) {
-    print_command_line_arguments(counter, arguments);
+    // print_command_line_arguments(counter, arguments);
 
     Flags flags;
     initialize_flags(&flags);
@@ -874,10 +685,9 @@ int main(int counter, const char **arguments) {
 
     parse(counter, arguments, &flags, &arguments_struct);
 
+    // printf("\n\n\n\n\n");
 
-    printf("\n\n\n\n\n");
-
-    File all_regexes;
+    FileStruct all_regexes;
     initialize_file_struct(&all_regexes);
 
     set_list_of_regexes_allocate(&all_regexes, &arguments_struct);
@@ -885,13 +695,12 @@ int main(int counter, const char **arguments) {
 
     for (int argument_index = 1; argument_index < arguments_struct.counter; ++argument_index) {
         if (arguments_struct.type[argument_index] == FILENAME_T) {
-            printf("%d) file to be opened: %s\n", argument_index, arguments_struct.word[argument_index]);
+            // printf("%d) file to be opened: %s\n", argument_index, arguments_struct.word[argument_index]);
             read_and_output_file_line_by_line(arguments_struct.word[argument_index], &flags, &arguments_struct, &all_regexes);
         }
     }
 
-
     free_file_struct(&all_regexes);
     free_arguments_struct(&arguments_struct);
     return 0;
-} // last non-empty line
+}

@@ -1,5 +1,5 @@
 
-// #include <regex.h>
+#include <regex.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -9,55 +9,55 @@
 
 #define UNUSED_SHIT(fucking_unused_shit) do { (void)(fucking_unused_shit); } while (0)
 
-typedef intptr_t ssize_t;
+// typedef intptr_t ssize_t;
 
-ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
-    size_t pos;
-    int c;
+// ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
+//     size_t pos;
+//     int c;
 
-    if (lineptr == NULL || stream == NULL || n == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
+//     if (lineptr == NULL || stream == NULL || n == NULL) {
+//         errno = EINVAL;
+//         return -1;
+//     }
 
-    c = getc(stream);
-    if (c == EOF) {
-        return -1;
-    }
+//     c = getc(stream);
+//     if (c == EOF) {
+//         return -1;
+//     }
 
-    if (*lineptr == NULL) {
-        *lineptr = malloc(128);
-        if (*lineptr == NULL) {
-            return -1;
-        }
-        *n = 128;
-    }
+//     if (*lineptr == NULL) {
+//         *lineptr = malloc(128);
+//         if (*lineptr == NULL) {
+//             return -1;
+//         }
+//         *n = 128;
+//     }
 
-    pos = 0;
-    while(c != EOF) {
-        if (pos + 1 >= *n) {
-            size_t new_size = *n + (*n >> 2);
-            if (new_size < 128) {
-                new_size = 128;
-            }
-            char *new_ptr = realloc(*lineptr, new_size);
-            if (new_ptr == NULL) {
-                return -1;
-            }
-            *n = new_size;
-            *lineptr = new_ptr;
-        }
+//     pos = 0;
+//     while(c != EOF) {
+//         if (pos + 1 >= *n) {
+//             size_t new_size = *n + (*n >> 2);
+//             if (new_size < 128) {
+//                 new_size = 128;
+//             }
+//             char *new_ptr = realloc(*lineptr, new_size);
+//             if (new_ptr == NULL) {
+//                 return -1;
+//             }
+//             *n = new_size;
+//             *lineptr = new_ptr;
+//         }
 
-        ((unsigned char *)(*lineptr))[pos ++] = c;
-        if (c == '\n') {
-            break;
-        }
-        c = getc(stream);
-    }
+//         ((unsigned char *)(*lineptr))[pos ++] = c;
+//         if (c == '\n') {
+//             break;
+//         }
+//         c = getc(stream);
+//     }
 
-    (*lineptr)[pos] = '\0';
-    return pos;
-}
+//     (*lineptr)[pos] = '\0';
+//     return pos;
+// }
 
 
 enum Boolean {
@@ -273,60 +273,60 @@ int is_line_suitable_and_print_o(Line* line, const Flags* flags, const Arguments
     }
 
     UNUSED_SHIT(all_regexes);
-    /*
-    // regex_t regex;
+    
+    regex_t regex;
     
 
-    // for (int regex_number = 0; regex_number < all_regexes->line_count; ++regex_number) {
+    for (int regex_number = 0; regex_number < all_regexes->line_count; ++regex_number) {
 
-    //     const char* regex_word = all_regexes->line[regex_number];
+        const char* regex_word = all_regexes->line[regex_number];
         
-    //     int compile_result = -1;
+        int compile_result = -1;
 
-    //     if (flags->i)
-    //         compile_result = regcomp(&regex, regex_word, REG_ICASE);
-    //     else
-    //         compile_result = regcomp(&regex, regex_word, 0);
+        if (flags->i)
+            compile_result = regcomp(&regex, regex_word, REG_ICASE);
+        else
+            compile_result = regcomp(&regex, regex_word, 0);
 
 
-    //     if (!compile_result) {
+        if (!compile_result) {
             
-    //         regmatch_t match;
-    //         int eflags = 0;
+            regmatch_t match;
+            int eflags = 0;
             
-    //         while (0 == regexec(&regex, line->line + offset, 1, &match, eflags)){
-    //             eflags = REG_NOTBOL;  //  not Beginning Of Line
+            while (0 == regexec(&regex, line->line + offset, 1, &match, eflags)){
+                eflags = REG_NOTBOL;  //  not Beginning Of Line
 
-    //             is_suitable = True;
+                is_suitable = True;
 
-    //             if (!flags->o || flags->v || flags->c) {
-    //                     break;
-    //             }
+                if (!flags->o || flags->v || flags->c) {
+                        break;
+                }
                 
-    //             const int begin = offset + match.rm_so;
-    //             const int end = offset + match.rm_eo;
-    //             print_for_o(line, begin, end, flags, &is_beginning_of_the_line);
-    //             offset += end; // += end ???
+                const int begin = offset + match.rm_so;
+                const int end = offset + match.rm_eo;
+                print_for_o(line, begin, end, flags, &is_beginning_of_the_line);
+                offset += end; // += end ???
 
-    //             if (end == begin)
-    //                 ++offset;
+                if (end == begin)
+                    ++offset;
                 
-    //             if (offset > line->length)
-    //                 break;
-    //         }
+                if (offset > line->length)
+                    break;
+            }
 
 
-    //     } else {
-    //         fprintf(stderr, "Regex compilation fail\n");
-    //     }
+        } else {
+            fprintf(stderr, "Regex compilation fail\n");
+        }
                 
-    //     if (is_suitable && !flags->o) {
-    //         break;
-    //     }
+        if (is_suitable && !flags->o) {
+            break;
+        }
 
-    // }
+    }
 
-    */
+    
     if (flags->v)
         is_suitable = !is_suitable;
 
@@ -342,7 +342,7 @@ void initialize_line(Line* line) {
     line->filename = NULL;
 }
 
-void read_and_output_file_line_by_line(const char* filename, const Flags* flags, const Arguments* arguments_struct, const FileStruct* all_regexes) {
+void read_and_output_file_line_by_line(const char* filename, int is_last_file, const Flags* flags, const Arguments* arguments_struct, const FileStruct* all_regexes) {
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
         if (!flags->s)  
@@ -358,13 +358,12 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
     
     int is_file_suitable = False;
     int suitable_line_counter = 0;
+    int is_previous_newline = False;
     while (True)  {                                                                                         //  getline allocates memory
 
         line_actual_length = getline(&line_for_getline, &line_allocated_length, input_file);
-  
-        if (line_actual_length == EOF) {
-            break;
-        }
+
+
 
         Line line;
         initialize_line(&line);
@@ -374,8 +373,23 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
         line.line_number = line_number;
         line.filename = filename;
 
+
+        if (line_actual_length == EOF) {
+            if (!is_previous_newline && !is_last_file && !flags->c && !flags->l) {
+                printf("\n");
+            }
+            break;
+        }
+
         if (is_line_suitable_and_print_o(&line, flags, arguments_struct, all_regexes)) {
             ++suitable_line_counter;
+
+            if (line.length == 1 && line.line[0] == '\n') {
+                is_previous_newline = True;
+            } else {
+                is_previous_newline = False;
+            }
+
             if (flags->l) {
                 is_file_suitable = True;
                 break;
@@ -397,7 +411,6 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
 
     if (flags->l && is_file_suitable)
         printf("%s\n", filename);
-
 }
 
 void print_command_line_arguments(int counter, const char** arguments) {
@@ -422,7 +435,7 @@ void print_command_line_arguments(int counter, const char** arguments) {
 */
 
 
-void parse(int counter, const char** arguments, Flags* flags, Arguments* arguments_struct) {
+int parse(int counter, const char** arguments, Flags* flags, Arguments* arguments_struct) {
     arguments_struct->counter = counter;
 
     int filename_counter = 0;
@@ -523,12 +536,21 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
 
     }
 
-    if (!flags->e && !flags->f)
-        arguments_struct->type[1] = PATTERN_T;
+    if (!flags->e && !flags->f) {
+        for (int index = 0; index < arguments_struct->counter; ++index) {
+            if (arguments_struct->type[index] == FILENAME_T) {
+                arguments_struct->type[index] = PATTERN_T;
+                break;
+            }
+        }
+        --filename_counter;
+    }
 
     if (filename_counter > 1)
         flags->print_filename = True;
 
+    
+    return filename_counter;
 }
 
 int get_file_character_count(const char* filename) {
@@ -760,7 +782,10 @@ void print_arguments_struct(const Arguments* arguments_struct) {
 }
 
 int main(int counter, const char **arguments) {
+
+#ifdef _DEBUG
     print_command_line_arguments(counter, arguments);
+#endif
 
     Flags flags;
     initialize_flags(&flags);
@@ -768,24 +793,35 @@ int main(int counter, const char **arguments) {
     Arguments arguments_struct;
     initialize_arguments_struct_allocate(&arguments_struct, counter, arguments);
 
-    parse(counter, arguments, &flags, &arguments_struct);
+    const int number_of_files = parse(counter, arguments, &flags, &arguments_struct);
+
+#ifdef _DEBUG
     print_arguments_struct(&arguments_struct);
+#endif
 
     FileStruct all_regexes;
     initialize_file_struct(&all_regexes);
 
     set_list_of_regexes_allocate(&all_regexes, &arguments_struct);
 
-
+#ifdef _DEBUG
     printf("\n\n\n\n\n");
+#endif
+
+    int file_number = 0;
     for (int argument_index = 1; argument_index < arguments_struct.counter; ++argument_index) {
         if (arguments_struct.type[argument_index] == FILENAME_T) {
+#ifdef _DEBUG
             printf("%d) file to be opened: %s\n", argument_index, arguments_struct.word[argument_index]);
-            read_and_output_file_line_by_line(arguments_struct.word[argument_index], &flags, &arguments_struct, &all_regexes);
+#endif
+
+            ++file_number;
+            const int is_last_file = (file_number == number_of_files);
+            read_and_output_file_line_by_line(arguments_struct.word[argument_index], is_last_file, &flags, &arguments_struct, &all_regexes);
         }
     }
 
-    // free_file_struct(&all_regexes);
+    free_file_struct(&all_regexes);
     free_arguments_struct(&arguments_struct);
     return 0;
 }

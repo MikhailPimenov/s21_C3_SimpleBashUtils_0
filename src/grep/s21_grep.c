@@ -1,8 +1,64 @@
+
+// #include <regex.h>
+
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <regex.h>
+#include <stdint.h>
+
+#define UNUSED_SHIT(fucking_unused_shit) do { (void)(fucking_unused_shit); } while (0)
+
+typedef intptr_t ssize_t;
+
+ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
+    size_t pos;
+    int c;
+
+    if (lineptr == NULL || stream == NULL || n == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    c = getc(stream);
+    if (c == EOF) {
+        return -1;
+    }
+
+    if (*lineptr == NULL) {
+        *lineptr = malloc(128);
+        if (*lineptr == NULL) {
+            return -1;
+        }
+        *n = 128;
+    }
+
+    pos = 0;
+    while(c != EOF) {
+        if (pos + 1 >= *n) {
+            size_t new_size = *n + (*n >> 2);
+            if (new_size < 128) {
+                new_size = 128;
+            }
+            char *new_ptr = realloc(*lineptr, new_size);
+            if (new_ptr == NULL) {
+                return -1;
+            }
+            *n = new_size;
+            *lineptr = new_ptr;
+        }
+
+        ((unsigned char *)(*lineptr))[pos ++] = c;
+        if (c == '\n') {
+            break;
+        }
+        c = getc(stream);
+    }
+
+    (*lineptr)[pos] = '\0';
+    return pos;
+}
+
 
 enum Boolean {
     False,
@@ -216,60 +272,61 @@ int is_line_suitable_and_print_o(Line* line, const Flags* flags, const Arguments
 
     }
 
-
-    regex_t regex;
+    UNUSED_SHIT(all_regexes);
+    /*
+    // regex_t regex;
     
 
-    for (int regex_number = 0; regex_number < all_regexes->line_count; ++regex_number) {
+    // for (int regex_number = 0; regex_number < all_regexes->line_count; ++regex_number) {
 
-        const char* regex_word = all_regexes->line[regex_number];
+    //     const char* regex_word = all_regexes->line[regex_number];
         
-        int compile_result = -1;
+    //     int compile_result = -1;
 
-        if (flags->i)
-            compile_result = regcomp(&regex, regex_word, REG_ICASE);
-        else
-            compile_result = regcomp(&regex, regex_word, 0);
+    //     if (flags->i)
+    //         compile_result = regcomp(&regex, regex_word, REG_ICASE);
+    //     else
+    //         compile_result = regcomp(&regex, regex_word, 0);
 
 
-        if (!compile_result) {
+    //     if (!compile_result) {
             
-            regmatch_t match;
-            int eflags = 0;
+    //         regmatch_t match;
+    //         int eflags = 0;
             
-            while (0 == regexec(&regex, line->line + offset, 1, &match, eflags)){
-                eflags = REG_NOTBOL;  //  not Beginning Of Line
+    //         while (0 == regexec(&regex, line->line + offset, 1, &match, eflags)){
+    //             eflags = REG_NOTBOL;  //  not Beginning Of Line
 
-                is_suitable = True;
+    //             is_suitable = True;
 
-                if (!flags->o || flags->v || flags->c) {
-                        break;
-                }
+    //             if (!flags->o || flags->v || flags->c) {
+    //                     break;
+    //             }
                 
-                const int begin = offset + match.rm_so;
-                const int end = offset + match.rm_eo;
-                print_for_o(line, begin, end, flags, &is_beginning_of_the_line);
-                offset += end; // += end ???
+    //             const int begin = offset + match.rm_so;
+    //             const int end = offset + match.rm_eo;
+    //             print_for_o(line, begin, end, flags, &is_beginning_of_the_line);
+    //             offset += end; // += end ???
 
-                if (end == begin)
-                    ++offset;
+    //             if (end == begin)
+    //                 ++offset;
                 
-                if (offset > line->length)
-                    break;
-            }
+    //             if (offset > line->length)
+    //                 break;
+    //         }
 
 
-        } else {
-            fprintf(stderr, "Regex compilation fail\n");
-        }
+    //     } else {
+    //         fprintf(stderr, "Regex compilation fail\n");
+    //     }
                 
-        if (is_suitable && !flags->o) {
-            break;
-        }
+    //     if (is_suitable && !flags->o) {
+    //         break;
+    //     }
 
-    }
+    // }
 
-
+    */
     if (flags->v)
         is_suitable = !is_suitable;
 
@@ -343,11 +400,27 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags,
 
 }
 
-// void print_command_line_arguments(int counter, const char** arguments) {
-//     for (int index = 0; index < counter; ++index) {
-//         printf("%d - %s\n", index, arguments[index]);
-//     }
-// }
+void print_command_line_arguments(int counter, const char** arguments) {
+    for (int index = 0; index < counter; ++index) {
+        printf("%d - %s\n", index, arguments[index]);
+    }
+}
+
+
+/* const char** arguments
+ 1               "-e",                  arguments[1]    arguments[1][1] = 'e'
+ 2               "include",             arguments[2]
+ 3               "-e",              
+ 4               "define",
+ 5               "${workspaceFolder}/src/grep/test2.txt",
+ 6               "-emain",              arguments[6]    arguments[6] + 1 + 1 = "main"
+ 7               "-ni",
+ 8               "-nf${workspaceFolder}/src/grep/regex_patterns1.txt",
+ 9              "${workspaceFolder}/src/grep/s21_grep.c",
+ 10              "-f",
+ 11              "${workspaceFolder}/src/grep/regex_patterns2.txt",
+*/
+
 
 void parse(int counter, const char** arguments, Flags* flags, Arguments* arguments_struct) {
     arguments_struct->counter = counter;
@@ -370,7 +443,6 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
 
                         if (argument_index < counter - 1) {
 
-                            arguments_struct->word[argument_index + 1] = arguments[argument_index + 1];
                             arguments_struct->type[argument_index + 1] = PATTERN_T;
 
                             ++argument_index;
@@ -411,7 +483,6 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
 
                         if (argument_index < counter - 1) {
 
-                            arguments_struct->word[argument_index + 1] = arguments[argument_index + 1];
                             arguments_struct->type[argument_index + 1] = REGEX_FILENAME_T;
                             
                             ++argument_index;
@@ -443,8 +514,7 @@ void parse(int counter, const char** arguments, Flags* flags, Arguments* argumen
             }
 
         } else {
-            
-            arguments_struct->word[argument_index] = arguments[argument_index];
+
             arguments_struct->type[argument_index] = FILENAME_T;
 
             ++filename_counter;
@@ -674,8 +744,23 @@ void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments
     
 }
 
+void print_arguments_struct(const Arguments* arguments_struct) {
+    printf("Begin of parsed arguments:\n");
+    for (int index = 1; index < arguments_struct->counter; ++index) {
+        if (arguments_struct->type[index] == ONLY_FLAG_T)
+            printf("%d - flag:\t\t%s\n", index, arguments_struct->word[index]);
+        else if (arguments_struct->type[index] == PATTERN_T) 
+            printf("%d - pattern:\t\t%s\n", index, arguments_struct->word[index]);
+        else if (arguments_struct->type[index] == FILENAME_T)
+            printf("%d - filename:\t\t%s\n", index, arguments_struct->word[index]);
+        else if (arguments_struct->type[index] == REGEX_FILENAME_T)
+            printf("%d - regex filename:\t%s\n", index, arguments_struct->word[index]);
+    }
+    printf("End of parsed arguments:\n");
+}
+
 int main(int counter, const char **arguments) {
-    // print_command_line_arguments(counter, arguments);
+    print_command_line_arguments(counter, arguments);
 
     Flags flags;
     initialize_flags(&flags);
@@ -684,8 +769,7 @@ int main(int counter, const char **arguments) {
     initialize_arguments_struct_allocate(&arguments_struct, counter, arguments);
 
     parse(counter, arguments, &flags, &arguments_struct);
-
-    // printf("\n\n\n\n\n");
+    print_arguments_struct(&arguments_struct);
 
     FileStruct all_regexes;
     initialize_file_struct(&all_regexes);
@@ -693,14 +777,15 @@ int main(int counter, const char **arguments) {
     set_list_of_regexes_allocate(&all_regexes, &arguments_struct);
 
 
+    printf("\n\n\n\n\n");
     for (int argument_index = 1; argument_index < arguments_struct.counter; ++argument_index) {
         if (arguments_struct.type[argument_index] == FILENAME_T) {
-            // printf("%d) file to be opened: %s\n", argument_index, arguments_struct.word[argument_index]);
+            printf("%d) file to be opened: %s\n", argument_index, arguments_struct.word[argument_index]);
             read_and_output_file_line_by_line(arguments_struct.word[argument_index], &flags, &arguments_struct, &all_regexes);
         }
     }
 
-    free_file_struct(&all_regexes);
+    // free_file_struct(&all_regexes);
     free_arguments_struct(&arguments_struct);
     return 0;
 }

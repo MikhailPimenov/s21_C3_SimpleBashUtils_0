@@ -8,17 +8,50 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug that shit",
-            // "program": "${workspaceFolder}/src/grep/s21_grep.out",
             "program": "${workspaceFolder}/src/grep/s21_grep",
-            // "program": "${workspaceFolder}/src/cat/s21_cat.out",
-            // "program": "${workspaceFolder}/src/cat/s21_cat",
-            // "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
-            // "args": ["-e", "${workspaceFolder}/src/cat/bytes.txt"],
-            // "args": ["-b", "${workspaceFolder}/texts/test1.txt", "${workspaceFolder}/texts/test3.txt"],
-            // "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
-            // "args": ["-e", "include", "-e", "define", "-e", "main", "${workspaceFolder}/src/grep/s21_grep.c"],
-            "args": ["-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns2.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "${workspaceFolder}/src/grep/s21_grep.c"],
+            "args": ["-e", "include", "${workspaceFolder}/src/grep/test2.txt", "-e", "main", "-n", "${workspaceFolder}/src/grep/s21_grep.c"],
             "cwd": "${workspaceFolder}"
         }
     ]
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "program": "${workspaceFolder}/src/grep/s21_grep.out",
+// "program": "${workspaceFolder}/src/cat/s21_cat.out",
+// "program": "${workspaceFolder}/src/cat/s21_cat",
+// "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
+// "args": ["-e", "${workspaceFolder}/src/cat/bytes.txt"],
+// "args": ["-b", "${workspaceFolder}/texts/test1.txt", "${workspaceFolder}/texts/test3.txt"],
+// "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
+// "args": ["-e", "include", "-e", "define", "-e", "main", "${workspaceFolder}/src/grep/s21_grep.c"],
+// "args": ["-einclude", "-edefine", "-emain", "${workspaceFolder}/src/grep/s21_grep.c"],
+// "args": ["-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns2.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "${workspaceFolder}/src/grep/s21_grep.c"],
+// "args": ["-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "${workspaceFolder}/src/grep/test2.txt", "${workspaceFolder}/src/grep/s21_grep.c", "-o", "-n"],
+      

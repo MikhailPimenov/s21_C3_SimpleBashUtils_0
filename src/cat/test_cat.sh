@@ -6,9 +6,9 @@ DIFF_RES=""
 TEST_FILE=""
 echo "" > log.txt
 
-for TEST_FILE1 in  "../../texts/test1.txt" "../../texts/test2.txt"
+for TEST_FILE1 in  "../texts/test1.txt" "../texts/test2.txt"
 do
-    for TEST_FILE2 in "../../texts/test3.txt" "../../texts/test4.txt" "../../texts/test5.txt"
+    for TEST_FILE2 in "../texts/test3.txt" "../texts/test4.txt" "../texts/test5.txt"
     do
     if [ $TEST_FILE1 != $TEST_FILE2 ]
     then
@@ -17,17 +17,17 @@ do
         do
                   TEST1="$var $TEST_FILE"
                   echo "$TEST1"
-                  ./s21_cat $TEST1 > s21_cat.txt
-                  cat $TEST1 > cat.txt
-                  DIFF_RES="$(diff -s s21_cat.txt cat.txt)"
-                  if [ "$DIFF_RES" == "Files s21_cat.txt and cat.txt are identical" ]
+                  ./cat/s21_cat $TEST1 > cat/s21_cat.txt
+                  cat $TEST1 > cat/cat.txt
+                  DIFF_RES="$(diff -s cat/s21_cat.txt cat/cat.txt)"
+                  if [ "$DIFF_RES" == "Files cat/s21_cat.txt and cat/cat.txt are identical" ]
                     then
                       (( COUNTER_SUCCESS++ ))
                     else
-                      echo "$TEST1" >> log.txt
+                      echo "$TEST1" >> cat/log.txt
                       (( COUNTER_FAIL++ ))
                   fi
-                  rm s21_cat.txt cat.txt
+                  rm cat/s21_cat.txt cat/cat.txt
         done
 
         for var in -b -e -n -s -t -v #-E -T --number-nonblank --number --squeeze-blank
@@ -38,17 +38,17 @@ do
                 then
                   TEST1="$var $var2 $TEST_FILE"
                   echo "$TEST1"
-                  ./s21_cat $TEST1 > s21_cat.txt
-                  cat $TEST1 > cat.txt
-                  DIFF_RES="$(diff -s s21_cat.txt cat.txt)"
-                  if [ "$DIFF_RES" == "Files s21_cat.txt and cat.txt are identical" ]
+                  ./cat/s21_cat $TEST1 > cat/s21_cat.txt
+                  cat $TEST1 > cat/cat.txt
+                  DIFF_RES="$(diff -s cat/s21_cat.txt cat/cat.txt)"
+                  if [ "$DIFF_RES" == "Files cat/s21_cat.txt and cat/cat.txt are identical" ]
                     then
                       (( COUNTER_SUCCESS++ ))
                     else
-                      echo "$TEST1" >> log.txt
+                      echo "$TEST1" >> cat/log.txt
                       (( COUNTER_FAIL++ ))
                   fi
-                  rm s21_cat.txt cat.txt
+                  rm cat/s21_cat.txt cat/cat.txt
                 fi
           done
         done
@@ -63,17 +63,17 @@ do
                 then
                   TEST1="$var $var2 $var3 $TEST_FILE"
                   echo "$TEST1"
-                  ./s21_cat $TEST1 > s21_cat.txt
-                  cat $TEST1 > cat.txt
-                  DIFF_RES="$(diff -s s21_cat.txt cat.txt)"
-                  if [ "$DIFF_RES" == "Files s21_cat.txt and cat.txt are identical" ]
+                  ./cat/s21_cat $TEST1 > cat/s21_cat.txt
+                  cat $TEST1 > cat/cat.txt
+                  DIFF_RES="$(diff -s cat/s21_cat.txt cat/cat.txt)"
+                  if [ "$DIFF_RES" == "Files cat/s21_cat.txt and cat/cat.txt are identical" ]
                     then
                       (( COUNTER_SUCCESS++ ))
                     else
-                      echo "$TEST1" >> log.txt
+                      echo "$TEST1" >> cat/log.txt
                       (( COUNTER_FAIL++ ))
                   fi
-                  rm s21_cat.txt cat.txt
+                  rm cat/s21_cat.txt cat/cat.txt
 
                 fi
               done
@@ -92,17 +92,17 @@ do
                     then
                       TEST1="$var $var2 $var3 $var4 $TEST_FILE"
                       echo "$TEST1"
-                      ./s21_cat $TEST1 > s21_cat.txt
-                      cat $TEST1 > cat.txt
-                      DIFF_RES="$(diff -s s21_cat.txt cat.txt)"
-                      if [ "$DIFF_RES" == "Files s21_cat.txt and cat.txt are identical" ]
+                      ./cat/s21_cat $TEST1 > cat/s21_cat.txt
+                      cat $TEST1 > cat/cat.txt
+                      DIFF_RES="$(diff -s cat/s21_cat.txt cat/cat.txt)"
+                      if [ "$DIFF_RES" == "Files cat/s21_cat.txt and cat/cat.txt are identical" ]
                         then
                           (( COUNTER_SUCCESS++ ))
                         else
-                          echo "$TEST1" >> log.txt
+                          echo "$TEST1" >> cat/log.txt
                           (( COUNTER_FAIL++ ))
                       fi
-                      rm s21_cat.txt cat.txt
+                      rm cat/s21_cat.txt cat/cat.txt
 
                     fi
                   done
@@ -113,35 +113,35 @@ do
     done
 done
 
-./s21_cat
+./cat/s21_cat
 (( COUNTER_SUCCESS++ ))
 
-./s21_cat --abir $TEST_FILE
+./cat/s21_cat --abir $TEST_FILE
 (( COUNTER_SUCCESS++ ))
 
 TEST1="-j"
 echo $TEST1
-./s21_cat $TEST1 > s21_cat.txt
-cat $TEST1 > cat.txt
-DIFF_RES="$(diff -s s21_cat.txt cat.txt)"
-if [ "$DIFF_RES" == "Files s21_cat.txt and cat.txt are identical" ]
+./cat/s21_cat $TEST1 > cat/s21_cat.txt
+cat $TEST1 > cat/cat.txt
+DIFF_RES="$(diff -s cat/s21_cat.txt cat/cat.txt)"
+if [ "$DIFF_RES" == "Files cat/s21_cat.txt and cat/cat.txt are identical" ]
 then
   (( COUNTER_SUCCESS++ ))
 else
-  echo "$TEST1" >> log.txt
+  echo "$TEST1" >> cat/log.txt
   (( COUNTER_FAIL++ ))
 fi
 
 TEST1="-e nofile"
 echo $TEST1
-./s21_cat $TEST1 > s21_cat.txt
-cat $TEST1 > cat.txt
-DIFF_RES="$(diff -s s21_cat.txt cat.txt)"
-if [ "$DIFF_RES" == "Files s21_cat.txt and cat.txt are identical" ]
+./cat/s21_cat $TEST1 > cat/s21_cat.txt
+cat $TEST1 > cat/cat.txt
+DIFF_RES="$(diff -s cat/s21_cat.txt cat/cat.txt)"
+if [ "$DIFF_RES" == "Files cat/s21_cat.txt and cat/cat.txt are identical" ]
 then
   (( COUNTER_SUCCESS++ ))
 else
-  echo "$TEST1" >> log.txt
+  echo "$TEST1" >> cat/log.txt
   (( COUNTER_FAIL++ ))
 fi
 

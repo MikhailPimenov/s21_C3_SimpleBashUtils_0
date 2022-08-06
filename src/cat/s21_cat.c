@@ -31,6 +31,62 @@ void initialize_flags(Flags *flags) {
     flags->v = False;
 }
 
+
+#include <errno.h>
+#include <stdint.h>
+
+// if typedef doesn't exist (msvc, blah)
+typedef intptr_t ssize_t;
+
+ssize_t my_getline(char **line, size_t *allocated_size, FILE *stream) {
+    size_t pos;
+    int c;
+
+    if (line == NULL || stream == NULL || allocated_size == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    c = getc(stream);
+    if (c == EOF) {
+        return -1;
+    }
+
+    if (*line == NULL) {
+        *line = malloc(128);
+        if (*line == NULL) {
+            return -1;
+        }
+        *allocated_size = 128;
+    }
+
+    pos = 0;
+    while(c != EOF) {
+        if (pos + 1 >= *allocated_size) {
+            size_t new_size = *allocated_size + (*allocated_size >> 2);
+            if (new_size < 128) {
+                new_size = 128;
+            }
+            char *new_ptr = realloc(*line, new_size);
+            if (new_ptr == NULL) {
+                return -1;
+            }
+            *allocated_size = new_size;
+            *line = new_ptr;
+        }
+
+        ((unsigned char *)(*line))[pos ++] = c;
+        if (c == '\n') {
+            break;
+        }
+        c = getc(stream);
+    }
+
+    (*line)[pos] = '\0';
+    return pos;
+}
+
+
 int is_tab(char symbol) {
     return symbol == '\t';
 }
@@ -140,7 +196,7 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags)
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = 0;
     while (True)  {                                                                                         //  getline allocates memory
-        line_actual_length = getline(&line, &line_allocated_length, input_file);
+        line_actual_length = my_getline(&line, &line_allocated_length, input_file);
   
         if (line_actual_length == EOF) {
             break;

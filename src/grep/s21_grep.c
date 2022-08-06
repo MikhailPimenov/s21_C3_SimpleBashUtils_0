@@ -7,59 +7,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define UNUSED_SHIT(fucking_unused_shit) do { (void)(fucking_unused_shit); } while (0)
-
-// typedef intptr_t ssize_t;
-
-// ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
-//     size_t pos;
-//     int c;
-
-//     if (lineptr == NULL || stream == NULL || n == NULL) {
-//         errno = EINVAL;
-//         return -1;
-//     }
-
-//     c = getc(stream);
-//     if (c == EOF) {
-//         return -1;
-//     }
-
-//     if (*lineptr == NULL) {
-//         *lineptr = malloc(128);
-//         if (*lineptr == NULL) {
-//             return -1;
-//         }
-//         *n = 128;
-//     }
-
-//     pos = 0;
-//     while(c != EOF) {
-//         if (pos + 1 >= *n) {
-//             size_t new_size = *n + (*n >> 2);
-//             if (new_size < 128) {
-//                 new_size = 128;
-//             }
-//             char *new_ptr = realloc(*lineptr, new_size);
-//             if (new_ptr == NULL) {
-//                 return -1;
-//             }
-//             *n = new_size;
-//             *lineptr = new_ptr;
-//         }
-
-//         ((unsigned char *)(*lineptr))[pos ++] = c;
-//         if (c == '\n') {
-//             break;
-//         }
-//         c = getc(stream);
-//     }
-
-//     (*lineptr)[pos] = '\0';
-//     return pos;
-// }
-
-
 enum Boolean {
     False,
     True
@@ -79,7 +26,6 @@ typedef struct Flags {
 
     char print_filename;
 } Flags;
-
 
 typedef struct FileStruct {
     char* data;
@@ -102,6 +48,58 @@ typedef struct Arguments {
 
     int *type;
 } Arguments;
+
+
+typedef intptr_t ssize_t;
+
+ssize_t my_getline(char **line, size_t *allocated_size, FILE *stream) {
+    size_t pos;
+    int c;
+
+    if (line == NULL || stream == NULL || allocated_size == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    c = getc(stream);
+    if (c == EOF) {
+        return -1;
+    }
+
+    if (*line == NULL) {
+        *line = malloc(128);
+        if (*line == NULL) {
+            return -1;
+        }
+        *allocated_size = 128;
+    }
+
+    pos = 0;
+    while(c != EOF) {
+        if (pos + 1 >= *allocated_size) {
+            size_t new_size = *allocated_size + (*allocated_size >> 2);
+            if (new_size < 128) {
+                new_size = 128;
+            }
+            char *new_ptr = realloc(*line, new_size);
+            if (new_ptr == NULL) {
+                return -1;
+            }
+            *allocated_size = new_size;
+            *line = new_ptr;
+        }
+
+        ((unsigned char *)(*line))[pos ++] = c;
+        if (c == '\n') {
+            break;
+        }
+        c = getc(stream);
+    }
+
+    (*line)[pos] = '\0';
+    return pos;
+}
+
 
 void initialize_arguments_struct_allocate(Arguments* arguments_struct, int counter, const char** arguments) {
     arguments_struct->word = arguments;
@@ -272,12 +270,9 @@ int is_line_suitable_and_print_o(Line* line, const Flags* flags, const Arguments
         }
 
     }
-
-    UNUSED_SHIT(all_regexes);
     
     regex_t regex;
     
-
     for (int regex_number = 0; regex_number < all_regexes->line_count; ++regex_number) {
 
         const char* regex_word = all_regexes->line[regex_number];
@@ -362,9 +357,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     int is_previous_newline = True;
     while (True)  {                                                                                         //  getline allocates memory
 
-        line_actual_length = getline(&line_for_getline, &line_allocated_length, input_file);
-
-
+        line_actual_length = my_getline(&line_for_getline, &line_allocated_length, input_file);
 
         Line line;
         initialize_line(&line);

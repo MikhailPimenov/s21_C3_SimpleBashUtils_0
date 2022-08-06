@@ -229,6 +229,7 @@ void print_for_o(const Line* line, int begin, int end, const Flags* flags, int* 
     for (int index = begin; index < end; ++index)
         printf("%c", line->line[index]);
 
+    // if (end > begin)
     printf("\n");
 }
 
@@ -358,7 +359,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     
     int is_file_suitable = False;
     int suitable_line_counter = 0;
-    int is_previous_newline = False;
+    int is_previous_newline = True;
     while (True)  {                                                                                         //  getline allocates memory
 
         line_actual_length = getline(&line_for_getline, &line_allocated_length, input_file);
@@ -405,7 +406,8 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     fclose(input_file);
 
     if (flags->c) {
-        printf("%s:", filename);
+        if (!flags->h)
+            printf("%s:", filename);
         printf("%d\n", suitable_line_counter);
     }
 
@@ -546,7 +548,7 @@ int parse(int counter, const char** arguments, Flags* flags, Arguments* argument
         --filename_counter;
     }
 
-    if (filename_counter > 1)
+    if (filename_counter > 1 && !flags->h)
         flags->print_filename = True;
 
     

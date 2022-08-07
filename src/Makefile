@@ -30,17 +30,23 @@ s21_grep_test_super_extended: s21_grep
 		bash $(BUILDDIRGREP)/test_grep_extended2.sh
 
 
-$(BUILDDIRCAT)/s21_cat: $(BUILDDIRCAT)/s21_cat.o
-		$(CC) $(LFLAGS) $< -o $@ 
+
+
+$(BUILDDIRCAT)/s21_cat: $(BUILDDIRCAT)/s21_cat.o common/my_getline.o
+		$(CC) $(LFLAGS) $^ -o $@ 
 
 $(BUILDDIRCAT)/s21_cat.o: $(BUILDDIRCAT)/s21_cat.c
 		$(CC) $(CFLAGS) $< -o $@ $(DEBUGFLAGS)
 
 
-$(BUILDDIRGREP)/s21_grep: $(BUILDDIRGREP)/s21_grep.o
-		$(CC) $(LFLAGS) $< -o $@
+$(BUILDDIRGREP)/s21_grep: $(BUILDDIRGREP)/s21_grep.o common/my_getline.o
+		$(CC) $(LFLAGS) $^ -o $@
 
 $(BUILDDIRGREP)/s21_grep.o: $(BUILDDIRGREP)/s21_grep.c
+		$(CC) $(CFLAGS) $< -o $@ $(DEBUGFLAGS)
+
+
+common/my_getline.o: common/my_getline.c common/my_getline.h
 		$(CC) $(CFLAGS) $< -o $@ $(DEBUGFLAGS)
 
 
@@ -79,3 +85,4 @@ valgrind: s21_grep s21_cat
 
 lint:
 		python3 ../materials/linters/cpplint.py --extensions=c */*.c; 
+		python3 ../materials/linters/cpplint.py --extensions=c */*.h; 

@@ -52,7 +52,7 @@ typedef struct Arguments {
 
 typedef intptr_t ssize_t;
 
-ssize_t my_getline(char **line, size_t *allocated_size, FILE *stream) {
+ssize_t my_getline_allocate(char **line, size_t *allocated_size, FILE *stream) {
     size_t pos;
     int c;
 
@@ -357,7 +357,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     int is_previous_newline = True;
     while (True)  {                                                                                         //  getline allocates memory
 
-        line_actual_length = my_getline(&line_for_getline, &line_allocated_length, input_file);
+        line_actual_length = my_getline_allocate(&line_for_getline, &line_allocated_length, input_file);
 
         Line line;
         initialize_line(&line);
@@ -693,72 +693,79 @@ void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments
         if (arguments_struct->type[index] == REGEX_FILENAME_T) {
             
             const char* filename = arguments_struct->word[index];
-            total_line_count += get_file_line_count(filename);
-            total_character_count += get_file_character_count(filename);
+
+            const int line_count = get_file_line_count(filename);
+            if (line_count > 0)
+                total_line_count += line_count;
+
+            const int character_count = get_file_character_count(filename);
+            if (character_count > 0)
+                total_character_count += character_count;
 
         }
 
     }
 
-    int success = True;
+    if (total_line_count > 0 && total_character_count > 0) {
 
-    giant_file_struct->data = malloc(total_character_count * sizeof(char));
+        int success = True;
 
-    if (!giant_file_struct->data)
-        success = False;
+        giant_file_struct->data = malloc(total_character_count * sizeof(char));
 
-    if (success) {
-
-        giant_file_struct->line = malloc(total_line_count * sizeof(char*));
-        if (!giant_file_struct->line)
+        if (!giant_file_struct->data)
             success = False;
-        
-        giant_file_struct->line[0] = giant_file_struct->data;
-        giant_file_struct->file_length = total_character_count;
-        giant_file_struct->line_count = total_line_count;
-
-        int line_index = 0;
-        ++line_index;
-        int character_shift = 0;
 
         if (success) {
 
-            for (int filename_index = 0; filename_index < arguments_struct->counter; ++filename_index) {
-                
-                if (arguments_struct->type[filename_index] == REGEX_FILENAME_T) {
+            giant_file_struct->line = malloc(total_line_count * sizeof(char*));
+            if (!giant_file_struct->line)
+                success = False;
+            
+            if (success) {
+        
+                giant_file_struct->line[0] = giant_file_struct->data;
+                giant_file_struct->file_length = total_character_count;
+                giant_file_struct->line_count = total_line_count;
 
-                    const char* filename = arguments_struct->word[filename_index];
+                int line_index = 0;
+                ++line_index;
+                int character_shift = 0;
 
-                    FileStruct file_struct;
-                    initialize_file_struct(&file_struct);
-                    set_struct_from_file_allocate(filename, &file_struct);
 
-                    for (int character_index = 0; character_index < file_struct.file_length; ++character_index) {
-                        const char symbol = file_struct.data[character_index];
+                for (int filename_index = 0; filename_index < arguments_struct->counter; ++filename_index) {
+                    
+                    if (arguments_struct->type[filename_index] == REGEX_FILENAME_T) {
 
-                        assert(character_index + character_shift < total_character_count);
-                        giant_file_struct->data[character_index + character_shift] = symbol;
-                
-                        if (!symbol && line_index < total_line_count) {
-                            assert(character_index + character_shift + 1 < total_character_count);
-                            assert(line_index < total_line_count);
-                            giant_file_struct->line[line_index] = giant_file_struct->data + character_index + character_shift + 1;
-                            ++line_index;
+                        const char* filename = arguments_struct->word[filename_index];
+
+                        FileStruct file_struct;
+                        initialize_file_struct(&file_struct);
+                        set_struct_from_file_allocate(filename, &file_struct);
+
+                        for (int character_index = 0; character_index < file_struct.file_length; ++character_index) {
+                            const char symbol = file_struct.data[character_index];
+
+                            assert(character_index + character_shift < total_character_count);
+                            giant_file_struct->data[character_index + character_shift] = symbol;
+                    
+                            if (!symbol && line_index < total_line_count) {
+                                assert(character_index + character_shift + 1 < total_character_count);
+                                assert(line_index < total_line_count);
+                                giant_file_struct->line[line_index] = giant_file_struct->data + character_index + character_shift + 1;
+                                ++line_index;
+                            }
                         }
+
+                        character_shift += file_struct.file_length;
+                        free_file_struct(&file_struct);
                     }
-
-                    character_shift += file_struct.file_length;
-                    free_file_struct(&file_struct);
                 }
-
             }
         }
-    
-    }
 
-    if (!success)
-        free_file_struct(giant_file_struct);
-    
+        if (!success)
+            free_file_struct(giant_file_struct);
+    }
 }
 
 void print_arguments_struct(const Arguments* arguments_struct) {

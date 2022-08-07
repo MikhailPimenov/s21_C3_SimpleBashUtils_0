@@ -38,7 +38,7 @@ void initialize_flags(Flags *flags) {
 // if typedef doesn't exist (msvc, blah)
 typedef intptr_t ssize_t;
 
-ssize_t my_getline(char **line, size_t *allocated_size, FILE *stream) {
+ssize_t my_getline_allocate(char **line, size_t *allocated_size, FILE *stream) {
     size_t pos;
     int c;
 
@@ -195,8 +195,8 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags)
 
     int line_number = 1;                                                                                    //  first line has number '1'
     int is_line_empty = 0;
-    while (True)  {                                                                                         //  getline allocates memory
-        line_actual_length = my_getline(&line, &line_allocated_length, input_file);
+    while (True)  {                                                                                         
+        line_actual_length = my_getline_allocate(&line, &line_allocated_length, input_file);                         
   
         if (line_actual_length == EOF) {
             break;

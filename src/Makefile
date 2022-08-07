@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -Werror -Wextra -std=c11 -pedantic -c -fsanitize=address
 LFLAGS=-fsanitize=address
-DEBUGFLAGS=#-g
+DEBUGFLAGS=-g
 
 BUILDDIRCAT=cat
 BUILDDIRGREP=grep

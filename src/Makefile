@@ -77,3 +77,5 @@ valgrind: s21_grep s21_cat
 		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRGREP)/s21_grep $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo > $(REPORT_DIRECTORY)/valgrind_report.txt 
 		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRGREP)/s21_grep $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt 
 
+lint:
+		python3 materials/linters/cpplint.py --extensions=c src/*/*.c; 

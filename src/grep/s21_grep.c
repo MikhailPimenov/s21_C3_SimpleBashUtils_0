@@ -669,13 +669,10 @@ void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments
             const int character_count = get_file_character_count(filename);
             if (character_count > 0)
                 total_character_count += character_count;
-
         }
-
     }
 
     if (total_line_count > 0 && total_character_count > 0) {
-
         int success = True;
 
         giant_file_struct->data = malloc(total_character_count * sizeof(char));
@@ -684,13 +681,11 @@ void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments
             success = False;
 
         if (success) {
-
             giant_file_struct->line = malloc(total_line_count * sizeof(char*));
             if (!giant_file_struct->line)
                 success = False;
-            
+
             if (success) {
-        
                 giant_file_struct->line[0] = giant_file_struct->data;
                 giant_file_struct->file_length = total_character_count;
                 giant_file_struct->line_count = total_line_count;
@@ -701,25 +696,26 @@ void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments
 
 
                 for (int filename_index = 0; filename_index < arguments_struct->counter; ++filename_index) {
-                    
                     if (arguments_struct->type[filename_index] == REGEX_FILENAME_T) {
-
                         const char* filename = arguments_struct->word[filename_index];
 
                         FileStruct file_struct;
                         initialize_file_struct(&file_struct);
                         set_struct_from_file_allocate(filename, &file_struct);
 
-                        for (int character_index = 0; character_index < file_struct.file_length; ++character_index) {
+                        for (int character_index = 0;
+                             character_index < file_struct.file_length;
+                             ++character_index) {
                             const char symbol = file_struct.data[character_index];
 
                             assert(character_index + character_shift < total_character_count);
                             giant_file_struct->data[character_index + character_shift] = symbol;
-                    
+
                             if (!symbol && line_index < total_line_count) {
                                 assert(character_index + character_shift + 1 < total_character_count);
                                 assert(line_index < total_line_count);
-                                giant_file_struct->line[line_index] = giant_file_struct->data + character_index + character_shift + 1;
+                                giant_file_struct->line[line_index] =
+                                    giant_file_struct->data + character_index + character_shift + 1;
                                 ++line_index;
                             }
                         }
@@ -758,7 +754,11 @@ int main(int counter, const char **arguments) {
         if (arguments_struct.type[argument_index] == FILENAME_T) {
             ++file_number;
             const int is_last_file = (file_number == number_of_files);
-            read_and_output_file_line_by_line(arguments_struct.word[argument_index], is_last_file, &flags, &arguments_struct, &all_regexes);
+            read_and_output_file_line_by_line(arguments_struct.word[argument_index],
+                                              is_last_file,
+                                              &flags,
+                                              &arguments_struct,
+                                              &all_regexes);
         }
     }
 

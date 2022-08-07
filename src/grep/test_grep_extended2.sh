@@ -1,3 +1,4 @@
+COUNTER_TEST=0
 COUNTER_SUCCESS=0
 COUNTER_FAIL=0
 DIFF_RES=""
@@ -29,7 +30,8 @@ do
               if [ $var != $var2 ] && [ $var != $var2 ] && [ $var != $var3 ] && [ $var != $var4 ] && [ $var != $var5 ] && [ $var != $var6 ] && [ $var2 != $var3 ] && [ $var2 != $var4 ] && [ $var2 != $var5 ] && [ $var2 != $var6 ] && [ $var3 != $var4 ] && [ $var3 != $var5 ] && [ $var3 != $var6 ] && [ $var4 != $var5 ] && [ $var4 != $var6 ] && [ $var5 != $var6 ]
               then
                 TEST1="$EFLAG $PATTERN1 -$var$var2$var3$var4$var5$var6 $FFLAG $PATTERNFILE $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
-                echo "$TEST1"
+                echo "$COUNTER_TEST $TEST1"
+                (( COUNTER_TEST++ ))
                 ./grep/s21_grep $TEST1 > grep/s21_grep.txt
                 grep $TEST1 > grep/grep.txt
                 DIFF_RES="$(diff -s grep/s21_grep.txt grep/grep.txt)"
@@ -43,7 +45,8 @@ do
                 rm grep/s21_grep.txt grep/grep.txt
 
                 TEST2="$EFLAG $PATTERN1 -$var$var2$var3$var4$var5$var6 $FFLAG $PATTERNFILE $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
-                echo "$TEST2"
+                echo "$COUNTER_TEST $TEST2"
+                (( COUNTER_TEST++ ))
                 ./grep/s21_grep $TEST2 > grep/s21_grep.txt
                 grep $TEST2 > grep/grep.txt
                 DIFF_RES="$(diff -s grep/s21_grep.txt grep/grep.txt)"
@@ -57,7 +60,8 @@ do
                 rm grep/s21_grep.txt grep/grep.txt
 
                 TEST3="$EFLAG $PATTERN1 -$var$var2$var3$var4$var5$var6 $FFLAG $PATTERNFILE $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
-                echo "$TEST3"
+                echo "$COUNTER_TEST $TEST3"
+                (( COUNTER_TEST++ ))
                 ./grep/s21_grep $TEST3 > grep/s21_grep.txt
                 grep $TEST3 > grep/grep.txt
                 DIFF_RES="$(diff -s grep/s21_grep.txt grep/grep.txt)"
@@ -71,7 +75,8 @@ do
                 rm grep/s21_grep.txt grep/grep.txt
 
                 TEST4="$EFLAG $PATTERN1 -$var$var2$var3$var4$var5$var6 $FFLAG $PATTERNFILE $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
-                echo "$TEST4"
+                echo "$COUNTER_TEST $TEST4"
+                (( COUNTER_TEST++ ))
                 ./grep/s21_grep $TEST4 > grep/s21_grep.txt
                 grep $TEST4 > grep/grep.txt
                 DIFF_RES="$(diff -s grep/s21_grep.txt grep/grep.txt)"
@@ -85,7 +90,8 @@ do
                 rm grep/s21_grep.txt grep/grep.txt
 
                 TEST5="$EFLAG $PATTERN1 -$var$var2$var3$var4$var5$var6 $FFLAG $PATTERNFILE $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
-                echo "$TEST5"
+                echo "$COUNTER_TEST $TEST5"
+                (( COUNTER_TEST++ ))
                 ./grep/s21_grep $TEST5 > grep/s21_grep.txt
                 grep $TEST5 > grep/grep.txt
                 DIFF_RES="$(diff -s grep/s21_grep.txt grep/grep.txt)"
@@ -99,7 +105,8 @@ do
                 rm grep/s21_grep.txt grep/grep.txt
 
                 TEST6="$EFLAG $PATTERN1 -$var$var2$var3$var4$var5$var6 $FFLAG $PATTERNFILE $FILENAME1 $FILENAME2 $FILENAME3 $FILENAME4 $FILENAME5"
-                echo "$TEST6"
+                echo "$COUNTER_TEST $TEST6"
+                (( COUNTER_TEST++ ))
                 ./grep/s21_grep $TEST6 > grep/s21_grep.txt
                 grep $TEST6 > grep/grep.txt
                 DIFF_RES="$(diff -s grep/s21_grep.txt grep/grep.txt)"

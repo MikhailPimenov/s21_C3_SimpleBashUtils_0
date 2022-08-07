@@ -340,7 +340,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     
     int is_file_suitable = False;
     int suitable_line_counter = 0;
-    int is_previous_newline = True;
+    int is_previous_newline = False;
     while (True)  {                          //  getline allocates memory
 
         line_actual_length = my_getline_allocate(&line_for_getline, &line_allocated_length, input_file);
@@ -355,7 +355,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
 
 
         if (line_actual_length == EOF) {
-            if (!is_previous_newline && !is_last_file && !flags->c && !flags->l) {
+            if (!is_previous_newline && !is_last_file && !flags->c && !flags->l && flags->v) {
                 printf("\n");
             }
             break;

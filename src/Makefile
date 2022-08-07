@@ -59,6 +59,7 @@ clean_s21_grep:
 
 clean: clean_s21_cat clean_s21_grep
 		rm -rf valgrind_report
+		rm -rf common/*.o
 
 
 leaks: s21_grep s21_cat

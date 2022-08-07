@@ -1,8 +1,6 @@
-
-#include <regex.h>
-
 #include <assert.h>
 #include <errno.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -48,7 +46,6 @@ typedef struct Arguments {
 
     int *type;
 } Arguments;
-
 
 typedef intptr_t ssize_t;
 
@@ -100,7 +97,6 @@ ssize_t my_getline_allocate(char **line, size_t *allocated_size, FILE *stream) {
     return pos;
 }
 
-
 void initialize_arguments_struct_allocate(Arguments* arguments_struct, int counter, const char** arguments) {
     arguments_struct->word = arguments;
     arguments_struct->counter = counter;
@@ -122,15 +118,6 @@ void free_arguments_struct(Arguments* arguments_struct) {
     arguments_struct->word = NULL;
     arguments_struct->counter = 0;
 }
-
-// void print_file_struct(const FileStruct* file_struct) {
-//     printf("begin:\n");
-
-//     for (int line_index = 0; line_index < file_struct->line_count; ++line_index)
-//         printf("%s\n", file_struct->line[line_index]);
-
-//     printf("end:\n");
-// }
 
 void initialize_flags(Flags *flags) {
     flags->e = False;
@@ -227,7 +214,6 @@ void print_for_o(const Line* line, int begin, int end, const Flags* flags, int* 
     for (int index = begin; index < end; ++index)
         printf("%c", line->line[index]);
 
-    // if (end > begin)
     printf("\n");
 }
 
@@ -342,7 +328,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     FILE* input_file = fopen(filename, "r");
     if (input_file == NULL) {
         if (!flags->s)  
-            printf("Failed to open file %s\n", filename);
+            fprintf(stderr, "Failed to open file %s\n", filename);
         return;
     }
 
@@ -350,12 +336,12 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
     size_t line_allocated_length = 0l;
     char *line_for_getline = NULL;
 
-    int line_number = 1;                                                                                    //  first line has number '1'
+    int line_number = 1;                      //  first line has number '1'
     
     int is_file_suitable = False;
     int suitable_line_counter = 0;
     int is_previous_newline = True;
-    while (True)  {                                                                                         //  getline allocates memory
+    while (True)  {                          //  getline allocates memory
 
         line_actual_length = my_getline_allocate(&line_for_getline, &line_allocated_length, input_file);
 
@@ -395,7 +381,7 @@ void read_and_output_file_line_by_line(const char* filename, int is_last_file, c
         ++line_number;
     }
 
-    free(line_for_getline);                                                                                             //  because getline allocates memory
+    free(line_for_getline);          //  because getline allocates memory
     fclose(input_file);
 
     if (flags->c) {
@@ -413,22 +399,6 @@ void print_command_line_arguments(int counter, const char** arguments) {
         printf("%d - %s\n", index, arguments[index]);
     }
 }
-
-
-/* const char** arguments
- 1               "-e",                  arguments[1]    arguments[1][1] = 'e'
- 2               "include",             arguments[2]
- 3               "-e",              
- 4               "define",
- 5               "${workspaceFolder}/src/grep/test2.txt",
- 6               "-emain",              arguments[6]    arguments[6] + 1 + 1 = "main"
- 7               "-ni",
- 8               "-nf${workspaceFolder}/src/grep/regex_patterns1.txt",
- 9              "${workspaceFolder}/src/grep/s21_grep.c",
- 10              "-f",
- 11              "${workspaceFolder}/src/grep/regex_patterns2.txt",
-*/
-
 
 int parse(int counter, const char** arguments, Flags* flags, Arguments* arguments_struct) {
     arguments_struct->counter = counter;
@@ -511,9 +481,7 @@ int parse(int counter, const char** arguments, Flags* flags, Arguments* argument
                     break;
 
                 } else if (argument[index] == 'o') {
-
                     flags->o = True;
-                
                 } else {
 
                     fprintf(stderr, "invalid flag %c%c\n", '-', argument[index]);
@@ -608,7 +576,7 @@ void set_struct_from_file_allocate(const char* filename, FileStruct* file_struct
     }
 
     if (success) {
-        file_struct->data = malloc(file_length * sizeof(char));  //  character as int not char
+        file_struct->data = malloc(file_length * sizeof(char));
 
         if (!file_struct->data)
             success = False;
@@ -768,26 +736,9 @@ void set_list_of_regexes_allocate(FileStruct* giant_file_struct, const Arguments
     }
 }
 
-void print_arguments_struct(const Arguments* arguments_struct) {
-    printf("Begin of parsed arguments:\n");
-    for (int index = 1; index < arguments_struct->counter; ++index) {
-        if (arguments_struct->type[index] == ONLY_FLAG_T)
-            printf("%d - flag:\t\t%s\n", index, arguments_struct->word[index]);
-        else if (arguments_struct->type[index] == PATTERN_T) 
-            printf("%d - pattern:\t\t%s\n", index, arguments_struct->word[index]);
-        else if (arguments_struct->type[index] == FILENAME_T)
-            printf("%d - filename:\t\t%s\n", index, arguments_struct->word[index]);
-        else if (arguments_struct->type[index] == REGEX_FILENAME_T)
-            printf("%d - regex filename:\t%s\n", index, arguments_struct->word[index]);
-    }
-    printf("End of parsed arguments:\n");
-}
-
 int main(int counter, const char **arguments) {
-
-#ifdef _DEBUG
-    print_command_line_arguments(counter, arguments);
-#endif
+    if (counter == 1)
+        fprintf(stderr, "grep: command line arguments are needed");
 
     Flags flags;
     initialize_flags(&flags);
@@ -797,26 +748,14 @@ int main(int counter, const char **arguments) {
 
     const int number_of_files = parse(counter, arguments, &flags, &arguments_struct);
 
-#ifdef _DEBUG
-    print_arguments_struct(&arguments_struct);
-#endif
-
     FileStruct all_regexes;
     initialize_file_struct(&all_regexes);
 
     set_list_of_regexes_allocate(&all_regexes, &arguments_struct);
 
-#ifdef _DEBUG
-    printf("\n\n\n\n\n");
-#endif
-
     int file_number = 0;
     for (int argument_index = 1; argument_index < arguments_struct.counter; ++argument_index) {
         if (arguments_struct.type[argument_index] == FILENAME_T) {
-#ifdef _DEBUG
-            printf("%d) file to be opened: %s\n", argument_index, arguments_struct.word[argument_index]);
-#endif
-
             ++file_number;
             const int is_last_file = (file_number == number_of_files);
             read_and_output_file_line_by_line(arguments_struct.word[argument_index], is_last_file, &flags, &arguments_struct, &all_regexes);

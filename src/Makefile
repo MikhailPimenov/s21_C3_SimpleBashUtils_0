@@ -52,12 +52,13 @@ clean: clean_s21_cat clean_s21_grep
 
 
 leaks: s21_grep s21_cat
+		leaks -atExit -- $(BUILDDIRCAT)/s21_cat
 		leaks -atExit -- $(BUILDDIRCAT)/s21_cat -n -s $(BUILDDIRCAT)/s21_cat.c
-		leaks -atExit -- $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -fregex_patterns.txt -eFor -f regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -e while
-		leaks -atExit -- $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -fregex_patterns.txt -eFor -f regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -o
+		leaks -atExit -- $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -e while
+		leaks -atExit -- $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -o
 
 valgrind: s21_grep s21_cat
 		mkdir -p $(REPORT_DIRECTORY)
 		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRCAT)/s21_cat $(BUILDDIRCAT)/s21_cat > $(REPORT_DIRECTORY)/valgrind_report.txt
-		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -fregex_patterns.txt -eFor -f regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -e while > $(REPORT_DIRECTORY)/valgrind_report.txt
-		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -fregex_patterns.txt -eFor -f regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt
+		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -e while > $(REPORT_DIRECTORY)/valgrind_report.txt
+		-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose $(BUILDDIRGREP)/s21_grep -emain -nieReTuRn $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt $(BUILDDIRGREP)/test2.txt -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt

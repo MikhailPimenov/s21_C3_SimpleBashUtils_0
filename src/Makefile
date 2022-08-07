@@ -1,6 +1,7 @@
 CC=gcc
-CFLAGS=-Wall -Werror -Wextra -std=c11 -pedantic -c -g -fsanitize=address
+CFLAGS=-Wall -Werror -Wextra -std=c11 -pedantic -c -fsanitize=address
 LFLAGS=-fsanitize=address
+DEBUGFLAGS=#-g
 
 BUILDDIRCAT=cat
 BUILDDIRGREP=grep
@@ -25,19 +26,22 @@ s21_grep_test: s21_grep
 s21_grep_test_extended: s21_grep
 		bash $(BUILDDIRGREP)/grep.sh
 
+s21_grep_test_super_extended: s21_grep
+		bash $(BUILDDIRGREP)/test_grep_extended2.sh
+
 
 $(BUILDDIRCAT)/s21_cat: $(BUILDDIRCAT)/s21_cat.o
 		$(CC) $(LFLAGS) $< -o $@ 
 
 $(BUILDDIRCAT)/s21_cat.o: $(BUILDDIRCAT)/s21_cat.c
-		$(CC) $(CFLAGS) $< -o $@
+		$(CC) $(CFLAGS) $< -o $@ $(DEBUGFLAGS)
 
 
 $(BUILDDIRGREP)/s21_grep: $(BUILDDIRGREP)/s21_grep.o
 		$(CC) $(LFLAGS) $< -o $@
 
 $(BUILDDIRGREP)/s21_grep.o: $(BUILDDIRGREP)/s21_grep.c
-		$(CC) $(CFLAGS) $< -o $@
+		$(CC) $(CFLAGS) $< -o $@ $(DEBUGFLAGS)
 
 
 clean_s21_cat:

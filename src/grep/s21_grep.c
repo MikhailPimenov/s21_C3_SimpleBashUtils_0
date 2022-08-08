@@ -136,17 +136,6 @@ int get_string_length(const char* string) {
     return length;
 }
 
-int get_line_length(const char* string) {
-    if (!string)
-        return 0;
-
-    int length = 0;
-    while (string[length] != '\n')
-        ++length;
-    ++length;
-    return length;
-}
-
 void print_for_o(const Line* line, int begin, int end, const Flags* flags, int* is_beginning_of_the_line) {
     if (*is_beginning_of_the_line) {
         if (flags->print_filename && !flags->h)
@@ -186,7 +175,7 @@ int is_line_suitable_and_print_o(Line* line,
 
                         is_suitable = True;
 
-                        if (!flags->o || flags->v || flags->c) {
+                        if (!flags->o || flags->v || flags->c || flags->l) {
                             break;
                         }
 
@@ -273,8 +262,6 @@ void read_and_output_file_line_by_line(const char* filename,
         return;
     }
 
-    ssize_t line_actual_length = 0ul;
-    size_t line_allocated_length = 0l;
     char *line_for_getline = NULL;
 
     int line_number = 1;                      //  first line has number '1'
@@ -283,6 +270,8 @@ void read_and_output_file_line_by_line(const char* filename,
     int suitable_line_counter = 0;
     int is_previous_newline = False;
     while (True)  {                          //  getline allocates memory
+        ssize_t line_actual_length = 0ul;
+        size_t line_allocated_length = 0l;
         line_actual_length = my_getline_allocate(&line_for_getline, &line_allocated_length, input_file);
 
         Line line;
@@ -334,11 +323,11 @@ void read_and_output_file_line_by_line(const char* filename,
         printf("%s\n", filename);
 }
 
-void print_command_line_arguments(int counter, const char** arguments) {
-    for (int index = 0; index < counter; ++index) {
-        printf("%d - %s\n", index, arguments[index]);
-    }
-}
+// void print_command_line_arguments(int counter, const char** arguments) {
+//     for (int index = 0; index < counter; ++index) {
+//         printf("%d - %s\n", index, arguments[index]);
+//     }
+// }
 
 int parse(int counter, const char** arguments, Flags* flags, Arguments* arguments_struct) {
     arguments_struct->counter = counter;

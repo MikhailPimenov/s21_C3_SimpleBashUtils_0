@@ -93,14 +93,14 @@ void print_line(int *line_number, const char* line, int length, const Flags* fla
     }
 }
 
-int get_line_length(const char* line) {
-    int length = 0;
-    while (line && line[length] && line[length] != '\n')
-        ++length;
-    ++length;
+// int get_line_length(const char* line) {
+//     int length = 0;
+//     while (line && line[length] && line[length] != '\n')
+//         ++length;
+//     ++length;
 
-    return length;
-}
+//     return length;
+// }
 
 void read_and_output_file_line_by_line(const char* filename, const Flags* flags) {
     FILE* input_file = fopen(filename, "r");
@@ -109,14 +109,14 @@ void read_and_output_file_line_by_line(const char* filename, const Flags* flags)
         return;
     }
 
-    ssize_t line_actual_length = 0ul;
-    size_t line_allocated_length = 0l;
     char *line = NULL;
 
 
     int line_number = 1;                 //  first line has number '1'
     int is_line_empty = 0;
     while (True) {
+        ssize_t line_actual_length = 0ul;
+        size_t line_allocated_length = 0l;
         line_actual_length = my_getline_allocate(&line, &line_allocated_length, input_file);
 
         if (line_actual_length == EOF) {
@@ -137,18 +137,11 @@ int are_equal(const char* string1, const char* string2, int length) {
     return True;
 }
 
-int is_found(const char* substring, int sublength, const char* string, int length) {
-    for (int index = 0; index < length - sublength; ++index)
-        if (are_equal(substring, string + index, length))
-            return True;
-    return False;
-}
-
-void print_command_line_arguments(int counter, const char** arguments) {
-    for (int index = 0; index < counter; ++index) {
-        printf("%d - %s\n", index, arguments[index]);
-    }
-}
+// void print_command_line_arguments(int counter, const char** arguments) {
+//     for (int index = 0; index < counter; ++index) {
+//         printf("%d - %s\n", index, arguments[index]);
+//     }
+// }
 
 int get_string_length(const char* string) {
     int length = 0;
@@ -157,9 +150,10 @@ int get_string_length(const char* string) {
     return length;
 }
 
-void set_flags(int counter, const char** arguments, Flags* flags, int* flag_counter) {
+int set_flags(int counter, const char** arguments, Flags* flags, int* flag_counter) {
     static const int short_flag_length = 2;
 
+    int result = True;
     for (int argument_index = 0; argument_index < counter; ++argument_index) {
         const int argument_length = get_string_length(arguments[argument_index]);
 
@@ -201,8 +195,14 @@ void set_flags(int counter, const char** arguments, Flags* flags, int* flag_coun
                    are_equal("-v", arguments[argument_index], argument_length)) {
             flags->v = True;
             ++(*flag_counter);
+        } else if (argument_length >= 1 &&
+                   arguments[argument_index][0] == '-') {
+            fprintf(stderr, "cat: illegal option -- %s\n", arguments[argument_index] + 1);
+            result = False;
         }
     }
+
+    return result;
 }
 
 int main(int counter, const char **arguments) {
@@ -211,10 +211,12 @@ int main(int counter, const char **arguments) {
     Flags flags;
     initialize_flags(&flags);
     int flag_counter = 0;
-    set_flags(counter, arguments, &flags, &flag_counter);
+    const int status = set_flags(counter, arguments, &flags, &flag_counter);
 
-    for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
-        read_and_output_file_line_by_line(arguments[file_index], &flags);
+    if (status) {
+        for (int file_index = flag_counter + 1; file_index < counter; ++file_index) {
+            read_and_output_file_line_by_line(arguments[file_index], &flags);
+        }
     }
 
     return 0;

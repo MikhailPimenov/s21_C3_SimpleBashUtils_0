@@ -13,10 +13,10 @@ def get_source_filenames():
     files_grep = os.listdir(PATH_TO_PROJECT + '/src/grep')
     arr_of_files = []
     for file in files_cat:
-        if file.find('.') != -1 and file[file.find('.') + 1] == 'c':
+        if file.find('.') != -1 and file[(file.find('.') + 1):] == 'c':
             arr_of_files.append('cat/' + file)
     for file in files_grep:
-        if file.find('.') != -1 and file[file.find('.') + 1] == 'c':
+        if file.find('.') != -1 and file[(file.find('.') + 1):] == 'c':
             arr_of_files.append('grep/' + file)
 
     return arr_of_files

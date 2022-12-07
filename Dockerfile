@@ -17,7 +17,4 @@ RUN groupadd -g 999 appuser && \
 
 USER appuser
 
-
 ENTRYPOINT [ "/project/src/_run_make_valgrind_for_dockerfile.sh" ]
-
-

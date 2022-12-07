@@ -13,13 +13,11 @@ WORKDIR /project/src/
 
 RUN groupadd -g 999 appuser && \
     useradd -r -u 999 -g appuser appuser && \
-    chmod +x run_valgrind_docker.sh
+    chmod +x _run_make_valgrind_for_dockerfile.sh
 
 USER appuser
 
-# ENTRYPOINT [ "make", "-f", "C3_SimpleBashUtils-4/src/Makefile", "valgrind" ]
-ENTRYPOINT [ "/project/src/run_valgrind_docker.sh" ]
-# ENTRYPOINT [ "../bin/bash" ]
-# CMD [ "bin/bash" ]
+
+ENTRYPOINT [ "/project/src/_run_make_valgrind_for_dockerfile.sh" ]
 
 

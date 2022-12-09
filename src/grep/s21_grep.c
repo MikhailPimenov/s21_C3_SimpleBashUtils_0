@@ -147,13 +147,12 @@ void print_for_o(const Line *line, int begin, int end, const Flags *flags,
 int is_line_suitable_and_print_o(Line *line, const Flags *flags,
                                  const Arguments *argument_struct,
                                  const FileStruct *all_regexes) {
-  
   int is_suitable = False;
 
   int is_beginning_of_the_line = True;
 
   int offset = 0;
-  
+
   int shortest_length_of_word_found = 99999999;
 
   for (int pattern_number = 0; pattern_number < argument_struct->counter;
@@ -177,16 +176,11 @@ int is_line_suitable_and_print_o(Line *line, const Flags *flags,
         if (flags->o) {
           offset = 0;
         }
-        // const char* string =  "Hello, world";
-        while (0 == regexec(&regex, line->line + offset, 1, &match, eflags)) {
-        // while (0 == regexec(&regex, "123456789" /*+ offset*/, 1, &match, eflags)) {
-        // while (0 == regexec(&regex, string, 1, &match, eflags)) {
-          eflags = REG_NOTBOL; /* not Beginning Of Line */
 
+        while (0 == regexec(&regex, line->line + offset, 1, &match, eflags)) {
           is_suitable = True;
 
           if (!flags->o || flags->v || flags->c || flags->l) {
-            regfree(&regex);
             break;
           }
 
@@ -194,7 +188,7 @@ int is_line_suitable_and_print_o(Line *line, const Flags *flags,
           const int end = offset + match.rm_eo;
 
           const int length_of_found_word = end - begin;
-          
+
           if (length_of_found_word <= shortest_length_of_word_found) {
             print_for_o(line, begin, end, flags, &is_beginning_of_the_line);
             shortest_length_of_word_found =
@@ -202,16 +196,14 @@ int is_line_suitable_and_print_o(Line *line, const Flags *flags,
           }
 
           offset = end;
-          regfree(&regex);
         }
+        regfree(&regex);
       } else {
         fprintf(stderr, "Regex compilation fail\n");
       }
       if (is_suitable && !flags->o) {
-        regfree(&regex);
         break;
       }
-      regfree(&regex);
     }
   }
 
@@ -239,16 +231,11 @@ int is_line_suitable_and_print_o(Line *line, const Flags *flags,
         offset = 0;
       }
 
-      // while (0 ==
-            //  regexec(&regex_extended, line->line + offset, 1, &match, eflags)) {
       while (0 ==
-             regexec(&regex_extended, "123456", 1, &match, eflags)) {
-        eflags = REG_NOTBOL; /* not Beginning Of Line */
-
+             regexec(&regex_extended, line->line + offset, 1, &match, eflags)) {
         is_suitable = True;
 
         if (!flags->o || flags->v || flags->c || flags->l) {
-          regfree(&regex_extended);
           break;
         }
 
@@ -264,16 +251,14 @@ int is_line_suitable_and_print_o(Line *line, const Flags *flags,
         }
 
         offset = end;
-        regfree(&regex_extended);
       }
     } else {
       fprintf(stderr, "Regex compilation fail\n");
     }
+    regfree(&regex_extended);
     if (is_suitable && !flags->o) {
-      regfree(&regex_extended);
       break;
     }
-    regfree(&regex_extended);
   }
 
   if (flags->v) {
@@ -318,27 +303,20 @@ void read_and_output_file_line_by_line(
     size_t line_allocated_length = 0l;
     line_actual_length = my_getline_allocate(
         &line_for_getline, &line_allocated_length, input_file);
-    // line_actual_length = getline(
-        // &line_for_getline, &line_allocated_length, input_file);
-
-  
 
     if (line_actual_length < 0l) {
       break;
     }
-    // const char* string = "abcdefgh";
-    // line_for_getline = (char*)string;
 
     Line line;
     initialize_line(&line);
 
-    if (line_actual_length > 0l && line_for_getline[line_actual_length - 1] == '\n') {
+    if (line_actual_length > 0l &&
+        line_for_getline[line_actual_length - 1] == '\n') {
       line.has_newline_at_end = True;
     }
 
-    // line_actual_length = 8l;
     line.line = line_for_getline;
-    // line.line = string;
     line.length = line_actual_length;
     line.line_number = line_number;
     line.filename = filename;

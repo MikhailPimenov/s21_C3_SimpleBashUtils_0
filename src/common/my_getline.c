@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "my_getline.h"
-#include <assert.h>
+
 ssize_t my_getline_allocate(char **line, size_t *allocated_size, FILE *stream) {
 
   if (line == NULL || stream == NULL || allocated_size == NULL) {
@@ -45,16 +45,6 @@ ssize_t my_getline_allocate(char **line, size_t *allocated_size, FILE *stream) {
     c = getc(stream);
   }
 
-  (*line)[pos - 1] = '\0';
-  // assert(0);
-  // for (unsigned int index = 0; index < *allocated_size; ++index) {
-    // (*line)[index] = '\0';
-  // }
-  // for (unsigned int index = 0; index <= pos; ++index) {
-    // printf("%u\t", index); 
-    // putchar((int)((*line)[index]));
-    // putchar('\n');
-  // }
-  // assert(0);
+  (*line)[pos] = '\0';
   return pos;
 }

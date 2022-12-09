@@ -2,4 +2,7 @@
 
 make clean
 
-valgrind_output=$(make valgrind)
+
+# place here your commands for valgrind:
+
+make valgrind

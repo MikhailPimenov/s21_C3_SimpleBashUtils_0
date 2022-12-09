@@ -1,20 +1,21 @@
-FROM ubuntu
+FROM alpine
 
-RUN apt-get update && apt-get install -y \
+RUN apk upgrade && apk add \
     valgrind \
     git \
     make \
     gcc \
+    musl-dev \
+    bash \
     && rm -rf /var/lib/apt/lists
 
 COPY . project/
 
 WORKDIR /project/src/
 
-RUN groupadd -g 999 appuser && \
-    useradd -r -u 999 -g appuser appuser && \
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup && \
     chmod +x _run_make_valgrind_for_dockerfile.sh
 
 USER appuser
-
 ENTRYPOINT [ "/project/src/_run_make_valgrind_for_dockerfile.sh" ]

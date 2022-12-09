@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "my_getline.h"
-#include <assert.h>
+
 ssize_t my_getline_allocate(char **line, size_t *allocated_size, FILE *stream) {
     size_t pos;
     int c;

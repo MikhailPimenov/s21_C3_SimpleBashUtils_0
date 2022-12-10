@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug",
+            "program": "${workspaceFolder}/src/grep/s21_grep",
+            "args": ["${workspaceFolder}/src/grep/s21_grep.c", "${workspaceFolder}/src/grep/s21_grep.c", "-f${workspaceFolder}/src/grep/regex_patterns.txt", "-eFor", "-f", "${workspaceFolder}/src/grep/regex_patterns2.txt", "${workspaceFolder}/src/texts/test2.txt", "${workspaceFolder}/src/texts/test_files/test_ptrn_grep.txt", "-e", "rege", "-neheLlo", "-o"],
+            // grep/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -fgrep/regex_patterns.txt -eFor -f grep/regex_patterns2.txt ../texts/test2.txt ${workspaceFolder}/src/texts/test_files/test_ptrn_grep.txt -e rege -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt 
+            // -valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s $(BUILDDIRGREP)/s21_grep $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt ../texts/test2.txt $(BUILDDIRGREP)/test_files/test_ptrn_grep.txt -e rege -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt 
+
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

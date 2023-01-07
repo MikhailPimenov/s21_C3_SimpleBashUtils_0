@@ -7,17 +7,24 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug that shit",
-            // "program": "${workspaceFolder}/src/grep/s21_grep.out",
+            "name": "Debug",
             "program": "${workspaceFolder}/src/grep/s21_grep",
-            // "program": "${workspaceFolder}/src/cat/s21_cat.out",
-            // "program": "${workspaceFolder}/src/cat/s21_cat",
-            // "args": ["-b", "${workspaceFolder}/src/cat/s21_cat.c"],
-            // "args": ["-e", "${workspaceFolder}/src/cat/bytes.txt"],
-            // "args": ["-b", "${workspaceFolder}/texts/test1.txt", "${workspaceFolder}/texts/test3.txt"],
-            // "args": ["-e", "${workspaceFolder}/src/cat/test1.txt"],
-            // "args": ["-e", "include", "-e", "define", "-e", "main", "${workspaceFolder}/src/grep/s21_grep.c"],
-            "args": ["-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns2.txt", "-f", "${workspaceFolder}/src/grep/regex_patterns.txt", "${workspaceFolder}/src/grep/s21_grep.c"],
+            "args": [
+                "${workspaceFolder}/src/grep/s21_grep.c",
+                "${workspaceFolder}/src/grep/s21_grep.c",
+                "-f${workspaceFolder}/src/grep/regex_patterns.txt",
+                "-eFor",
+                "-f",
+                "${workspaceFolder}/src/grep/regex_patterns2.txt",
+                "${workspaceFolder}/src/texts/test2.txt",
+                "${workspaceFolder}/src/texts/test_files/test_ptrn_grep.txt",
+                "-e",
+                "rege",
+                "-neheLlo",
+                "-o"
+            ],
+            // grep/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -fgrep/regex_patterns.txt -eFor -f grep/regex_patterns2.txt ../texts/test2.txt ${workspaceFolder}/src/texts/test_files/test_ptrn_grep.txt -e rege -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt 
+            // -valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s $(BUILDDIRGREP)/s21_grep $(BUILDDIRGREP)/s21_grep.c $(BUILDDIRGREP)/s21_grep.c -f$(BUILDDIRGREP)/regex_patterns.txt -eFor -f $(BUILDDIRGREP)/regex_patterns2.txt ../texts/test2.txt $(BUILDDIRGREP)/test_files/test_ptrn_grep.txt -e rege -neheLlo -o > $(REPORT_DIRECTORY)/valgrind_report.txt 
             "cwd": "${workspaceFolder}"
         }
     ]
